@@ -22,7 +22,6 @@ class Multipleworld(object):
 
     def __init__(self, config, instruments, initial_state=None):
         self.instruments_map = dict.fromkeys(instruments)
-        # self.populations = []
         self.species = {}
         self.best_genomes = {}
         self.reporters = ReporterSet()
@@ -46,7 +45,6 @@ class Multipleworld(object):
             self.generation = 0
             i = 0
             for instrument in instruments:
-                print(i, instrument)
                 population = self.reproduction.create_new(config.genome_type,
                                                           config.genome_config,
                                                           config.pop_size)
@@ -54,7 +52,6 @@ class Multipleworld(object):
                 self.species[instrument] = config.species_set_type(config.species_set_config, self.reporters)
                 self.species[instrument].speciate(config, self.instruments_map[instrument], self.generation)
                 i = i + 1
-            print('done')
         else:
             self.population, self.species, self.generation = initial_state
 
@@ -95,20 +92,17 @@ class Multipleworld(object):
 
             # Evaluate all genomes using the user-provided function.
             # x = list(((item[0], list(iteritems(item[1]))) for item in self.instruments_map.items()))
-            fitness_function(list(((item[0], list(iteritems(item[1]))) for item in self.instruments_map.items())), self.config)
-
-            # Gather and report statistics.
-            i = 0
+            fitness_function(dict(((item[0], list(iteritems(item[1]))) for item in self.instruments_map.items())), self.config)
 
             for (instrument, population) in self.instruments_map.items():
-                print(instrument, population)
+                # Gather and report statistics.
                 best = None
-                # Track the best genome ever seen.
                 for g in itervalues(population):
                     if best is None or g.fitness > best.fitness:
                         best = g
-                    self.reporters.post_evaluate(self.config, population, self.species[instrument], best)
+                self.reporters.post_evaluate(self.config, population, self.species[instrument], best)
 
+                # Track the best genome ever seen.
                 if not (instrument in self.best_genomes) or best.fitness > self.best_genomes[instrument].fitness:
                     self.best_genomes[instrument] = best
 
@@ -137,7 +131,7 @@ class Multipleworld(object):
                         raise CompleteExtinctionException()
 
                 # Divide the new population into species.
-                self.species[instrument].speciate(self.config, population, self.generation)
+                self.species[instrument].speciate(self.config, self.instruments_map[instrument], self.generation)
 
             # self.reporters.end_generation(self.config, self.population, self.species)
 
