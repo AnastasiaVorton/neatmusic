@@ -8,6 +8,10 @@ from multipleworld_neat import *
 
 
 def main():
+    test = gen_test(10)
+    print(test)
+    print(answer_test(test))
+
     conf_path = os.path.join(os.path.dirname(__file__), 'neat-config')
     config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
     num_of_octaves = int(input("Please enter the number of octaves you want your music to be generated: "))
@@ -29,7 +33,7 @@ def main():
     print(winner)
     for test in valid_tests:
         net = build_generator_function(winner, config)
-        print(eval_function(net, test))
+        print(eval_function(net))
 
 
 def set_network_parameters(num_of_octaves, num_of_instruments, cnf, cnf_path):
@@ -52,7 +56,7 @@ def eval_genomes(genomes, config):
     genomes = genomes[0][1]
     for genome_id, genome in genomes:
         func = build_generator_function(genome, config)
-        genome.fitness = eval_tests(func)
+        genome.fitness = eval_function(func)
 
 
 if __name__ == "__main__":
