@@ -57,6 +57,7 @@ def eval_genome(genome, config):
 
 
 def eval_genomes(genomes, config):
+    genomes = genomes[0][1]
     for genome_id, genome in genomes:
         genome.fitness = eval_genome(genome, config)
 
