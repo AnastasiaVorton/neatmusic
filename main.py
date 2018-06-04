@@ -15,6 +15,10 @@ from fitness import *
 
 
 def main():
+    test = gen_test(10)
+    print(test)
+    print(answer_test(test))
+
     conf_path = os.path.join(os.path.dirname(__file__), 'neat-config')
     config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
 
@@ -25,11 +29,11 @@ def main():
     p.add_reporter(stats)
     p.add_reporter(Checkpointer(50))
 
-    winner = p.run(eval_genomes, 10000)
+    winner = p.run(eval_genomes, 100)
     print(winner)
     for test in valid_tests:
         net = build_generator_function(winner, config)
-        print(eval_function(net, test))
+        print(eval_function(net))
 
 
 def build_generator_function(genome, config: Config):
@@ -39,7 +43,7 @@ def build_generator_function(genome, config: Config):
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:
         func = build_generator_function(genome, config)
-        genome.fitness = eval_tests(func)
+        genome.fitness = eval_function(func)
 
 
 if __name__ == "__main__":

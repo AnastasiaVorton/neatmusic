@@ -1,3 +1,5 @@
+import random
+
 tests = [
     [(0.0, 0.0), (0.0, 1.0), (0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (1.0, 0.0), (0.0, 0.0)],
     [(0.0, 0.0), (0.0, 1.0), (0.0, 0.0), (0.0, 1.0)],
@@ -14,6 +16,12 @@ valid_tests = [
     [(1.0, 0.0), (0.0, 1.0), (1.0, 1.0), (0.0, 1.0), (0.0, 0.0)],
 ]
 
+def gen_test(size):
+    return [random.choice([0.0, 1.0]) for _ in range(10)]
+
+def answer_test(test):
+    return [float((i % 2 != 0) ^ bool(round(j))) for i, j in enumerate(test)]
+
 def is_valid(test) -> bool:
     start = True
     for i, o in test:
@@ -22,17 +30,17 @@ def is_valid(test) -> bool:
         start = not start
     return True
 
-def eval_function(net, test) -> float:
-    cur = len(test)
-    net.reset()
-    for xi, xo in test:
-        output = net.activate((xi,))
-        cur -= (output[0] - xo) ** 2
-    return cur / len(test)
-
-def eval_tests(net) -> float:
-    value = 0.0
-    for test in tests:
-        value += eval_function(net, test)
-    return value / len(tests)
-        
+def eval_function(net) -> float:
+    cur = 0
+    for _ in range(10):
+        size = random.randint(8, 10)
+        val = size
+        test = gen_test(size)
+        answer = answer_test(test)
+        net.reset()
+        for i in range(size):
+            output = net.activate((test[i],))
+            val -= (output[0] - answer[i]) ** 2
+        val /= size
+        cur += val
+    return cur / 10
