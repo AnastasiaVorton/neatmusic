@@ -25,11 +25,11 @@ def main():
     p.add_reporter(stats)
     p.add_reporter(Checkpointer(50))
 
-    winner = p.run(eval_genomes, 10000)
-    print(winner)
+    winner = p.run(eval_genomes, 100000)
+    # print(winner)
     for test in valid_tests:
         net = build_generator_function(winner, config)
-        print(eval_function(net, test))
+        # print(eval_function(net, test))
 
 
 def build_generator_function(genome, config: Config):
