@@ -1,18 +1,10 @@
 import os
 import configparser
 from neat import *
-from neat.checkpoint import Checkpointer
-from neat.config import Config
-from neat.genome import DefaultGenome
-from neat.nn import RecurrentNetwork
-from neat.population import Population
-from neat.reporting import StdOutReporter
-from neat.reproduction import DefaultReproduction
-from neat.species import DefaultSpeciesSet
-from neat.stagnation import DefaultStagnation
-from neat.statistics import StatisticsReporter
+from neat.nn import MLRecurrentNetwork
 
 from fitness import *
+from multipleworld_neat import *
 
 
 def main():
@@ -21,17 +13,23 @@ def main():
     num_of_octaves = int(input("Please enter the number of octaves you want your music to be generated: "))
     num_of_instruments = int(input("Please enter the number of instruments you want to generate: "))
 
-    p = Population(config)
+    instruments = [1]
+
+    p = Multipleworld(config, instruments)
 
     p.add_reporter(StdOutReporter(True))
     stats = StatisticsReporter()
     p.add_reporter(stats)
-    p.add_reporter(Checkpointer(5))
+    p.add_reporter(Checkpointer(50))
 
     set_network_parameters(num_of_octaves, num_of_instruments, config, conf_path)
 
-    winner = p.run(eval_genomes, 300)
+    winner = p.run(eval_genomes, 100)
+    
     print(winner)
+    for test in valid_tests:
+        net = build_generator_function(winner, config)
+        print(eval_function(net, test))
 
 
 def set_network_parameters(num_of_octaves, num_of_instruments, cnf, cnf_path):
@@ -47,14 +45,14 @@ def set_network_parameters(num_of_octaves, num_of_instruments, cnf, cnf_path):
 
 
 def build_generator_function(genome, config: Config):
-    nn = RecurrentNetwork.create(genome, config)
-    return lambda input: nn.activate(input)
+    return MLRecurrentNetwork.create(genome, config)
 
 
 def eval_genomes(genomes, config):
+    genomes = genomes[0][1]
     for genome_id, genome in genomes:
         func = build_generator_function(genome, config)
-        genome.fitness = eval_function(func)
+        genome.fitness = eval_tests(func)
 
 
 if __name__ == "__main__":
