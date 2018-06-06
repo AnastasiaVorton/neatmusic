@@ -77,25 +77,33 @@ def check_tonality(separate_track):
             num_good += 1
         else:
             num_bad += 1
-    print('good: ', num_good, 'bad: ', num_bad)
+    print('tonality fitness: ', 'good: ', num_good, 'bad: ', num_bad)
     # ratio of good notes to total number of notes
     perc_good = num_good / len(notes)
     return perc_good
 
 
-def check_notes_number(separate_track):
+def check_notes_number(instrument, separate_track):
     """
     Checks if the number of notes in chord less or equal to 4.
     :return: The value of correctness (in percents).
     """
     num_good = 0
     num_bad = 0
-    for chord in separate_track:
-        if len(chord[0]) >= 5:
-            num_bad += 1
-        else:
-            num_good += 1
-    print('good: ', num_good, 'bad: ', num_bad)
+    # check if bass guitar
+    if instrument == 33:
+        for chord in separate_track:
+            if len(chord[0]) >= 2:
+                num_bad += 1
+            else:
+                num_good += 1
+    else:  # check if piano or rhythm guitar
+        for chord in separate_track:
+            if len(chord[0]) >= 5:
+                num_bad += 1
+            else:
+                num_good += 1
+    print('notes number fitness: ', 'good: ', num_good, 'bad: ', num_bad)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / len(separate_track)
     return perc_good
@@ -146,7 +154,6 @@ def check_chord_intervals(separate_track):
                 elif first % 12 == 11 and second == first + 3 and third == second + 3:
                     num_good += 1
         elif len(chord[0]) == 4:
-            print(chord[0])
             total_chords += 1
             first = chord[0][0]
             second = chord[0][1]
@@ -166,12 +173,42 @@ def check_chord_intervals(separate_track):
                 # check if MVII2
                 if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
                     num_good += 1
-    print('good: ', num_good)
+    print('chords fitness: ', 'good: ', num_good)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / total_chords
     return perc_good
 
 
+def fitness_function(music):
+    """
+        instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
+        # DONE - Tonality: Check all notes if they belong to tonality or not
+        # DONE - Number of simultaneously played notes 
+        # DONE - Intervals in chords:
+        . Intervals in 2 note combinations
+        . Difference in interval between chords. (разрешения)
+        . Колина непонятная штука
+        . All instruments play in their range
+    """
+    results = {}
+    for instr, notes in music.items():
+        result = 0.0
+        # check for piano and rhythm guitar
+        if instr == 1 or instr == 26:
+            result += check_tonality(notes)
+            result += check_notes_number(instr, notes)
+            result += check_chord_intervals(notes)
+            results[instr] = result
+        # check for bass
+        elif instr == 33:
+            result += check_tonality(notes)
+            result += check_notes_number(instr, notes)
+            results[instr] = result
+    return results
+
+music = {1: chords}
 # print('tonality fitness: ', check_tonality(chords))
 # print('number of notes fitness', check_notes_number(chords))
-print(check_chord_intervals(chords))
+# print(check_chord_intervals(chords))
+
+print(fitness_function(music))

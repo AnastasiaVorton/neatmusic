@@ -135,7 +135,6 @@ def check_chord_intervals(separate_track):
                 elif first % 12 == 11 and second == first + 3 and third == second + 3:
                     num_good += 1
         elif len(chord[0]) == 4:
-            print(chord[0])
             total_chords += 1
             first = chord[0][0]
             second = chord[0][1]
@@ -166,14 +165,12 @@ def fitness_function(music):
         instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
         # DONE - Tonality: Check all notes if they belong to tonality or not
         # DONE - Number of simultaneously played notes 
-        . Intervals in chords:
+        # DONE - Intervals in chords:
         . Intervals in 2 note combinations
-        . Difference in interval between
-        . Difference in interval between chords.
-        # TODO - All instruments play in their range
+        . Difference in interval between chords. (разрешения)
+        . Колина непонятная штука
+        . All instruments play in their range
     """
-    # 'music' is a map of lists.
-    # Check for tonality
     results = {}
     for instr, notes in music.items():
         result = 0.0
