@@ -1,42 +1,61 @@
 import random
 
+chords = []
 
-def gen_test(size):
-    return [random.choice([0.0, 1.0]) for _ in range(10)]
+notes = []
+for i in range(60, 128):
+    notes.append(i)
 
+durations = [1 / 32, 1 / 16, 1 / 8, 1 / 4, 1 / 2, 1]
+chords.append(([60], 1 / 16))
+for i in range(15):
+    p = random.uniform(0.0, 1.0)
+    if 0.0 < p < 0.2:
+        chords.append(([random.choice(notes)], random.choice(durations)))
+    elif 0.2 < p < 0.4:
+        chords.append(([random.choice(notes), random.choice(notes)], random.choice(durations)))
+    elif 0.4 < p < 0.6:
+        chords.append(([random.choice(notes), random.choice(notes), random.choice(notes)], random.choice(durations)))
+        chords.append(([60, 64, 67], random.choice(durations)))
+    elif 0.6 < p < 0.8:
+        chords.append(([random.choice(notes), random.choice(notes), random.choice(notes), random.choice(notes)],
+                       random.choice(durations)))
+        chords.append(([59, 62, 65, 68], random.choice(durations)))
+    elif 0.8 < p < 1.0:
+        chords.append(([random.choice(notes), random.choice(notes), random.choice(notes), random.choice(notes),
+                        random.choice(notes)], random.choice(durations)))
 
-def answer_test(test):
-    return [float((i % 2 != 0) ^ bool(round(j))) for i, j in enumerate(test)]
-
-
-def is_valid(test) -> bool:
-    start = True
-    for i, o in test:
-        if (o >= 0.5) == (start ^ (i >= 0.5)):
-            return False
-        start = not start
-    return True
-
-
-def eval_function(net) -> float:
-    cur = 0
-    for _ in range(10):
-        size = random.randint(8, 10)
-        val = size
-        test = gen_test(size)
-        answer = answer_test(test)
-        net.reset()
-        for i in range(size):
-            output = net.activate((test[i],))
-            val -= (output[0] - answer[i]) ** 2
-        val /= size
-        cur += val
-    return cur / 10
+print('length: ', len(chords), 'chords: ', chords)
 
 
-"""
-    NEXT CODE IS IMPLEMENTATION OF FITNESS FUNCTION
-"""
+def music_parser(music):
+    """
+    Parse list by the beginning.
+    :param music: given music
+    :return: parsed list of notes
+    """
+    parsed_music = {}
+    for part in range(len(music)):
+        cnt = 1
+        chord = []
+        parsed_part = []
+        for tick in range(len(music[part])):
+            end_of_chord = False
+            if tick != len(music[part]) - 1:
+                for i in range(len(music[part][tick])):
+                    if music[part][tick][i] != music[part][tick + 1][i]:
+                        end_of_chord = True
+                        break
+            if end_of_chord or tick == len(music[part]) - 1:
+                for i in range(len(music[part][tick])):
+                    if music[part][tick][i] == 1.0:
+                        chord.append(i % 12)
+                parsed_part.append((chord.copy(), float(cnt) / 64))
+                chord.clear()
+                cnt = 0
+            cnt += 1
+        parsed_music[part] = parsed_part.copy()
+    return parsed_music.copy()
 
 
 def check_tonality(separate_track):
@@ -58,7 +77,7 @@ def check_tonality(separate_track):
             num_good += 1
         else:
             num_bad += 1
-    print('good: ', num_good, 'bad: ', num_bad)
+    print('tonality fitness: ', 'good: ', num_good, 'bad: ', num_bad)
     # ratio of good notes to total number of notes
     perc_good = num_good / len(notes)
     return perc_good
@@ -84,7 +103,7 @@ def check_notes_number(instrument, separate_track):
                 num_bad += 1
             else:
                 num_good += 1
-    print('good: ', num_good, 'bad: ', num_bad)
+    print('notes number fitness: ', 'good: ', num_good, 'bad: ', num_bad)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / len(separate_track)
     return perc_good
@@ -154,7 +173,7 @@ def check_chord_intervals(separate_track):
                 # check if MVII2
                 if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
                     num_good += 1
-    print('good: ', num_good)
+    print('chords fitness: ', 'good: ', num_good)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / total_chords
     return perc_good
@@ -187,32 +206,9 @@ def fitness_function(music):
             results[instr] = result
     return results
 
+music = {1: chords}
+# print('tonality fitness: ', check_tonality(chords))
+# print('number of notes fitness', check_notes_number(chords))
+# print(check_chord_intervals(chords))
 
-def music_parser(music):
-    """
-    Parse list by the beginning.
-    :param music: given music
-    :return: parsed list of notes
-    """
-    parsed_music = {}
-    for part in range(len(music)):
-        cnt = 1
-        chord = []
-        parsed_part = []
-        for tick in range(len(music[part])):
-            end_of_chord = False
-            if tick != len(music[part]) - 1:
-                for i in range(len(music[part][tick])):
-                    if music[part][tick][i] != music[part][tick + 1][i]:
-                        end_of_chord = True
-                        break
-            if end_of_chord or tick == len(music[part]) - 1:
-                for i in range(len(music[part][tick])):
-                    if music[part][tick][i] == 1.0:
-                        chord.append(i % 12)
-                parsed_part.append((chord.copy(), float(cnt) / 64))
-                chord.clear()
-                cnt = 0
-            cnt += 1
-        parsed_music[part] = parsed_part.copy()
-    return parsed_music.copy()
+print(fitness_function(music))
