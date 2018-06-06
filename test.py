@@ -26,6 +26,36 @@ for i in range(15):
 print('length: ', len(chords), 'chords: ', chords)
 
 
+def music_parser(music):
+    """
+    Parse list by the beginning.
+    :param music: given music
+    :return: parsed list of notes
+    """
+    parsed_music = {}
+    for part in range(len(music)):
+        cnt = 1
+        chord = []
+        parsed_part = []
+        for tick in range(len(music[part])):
+            end_of_chord = False
+            if tick != len(music[part]) - 1:
+                for i in range(len(music[part][tick])):
+                    if music[part][tick][i] != music[part][tick + 1][i]:
+                        end_of_chord = True
+                        break
+            if end_of_chord or tick == len(music[part]) - 1:
+                for i in range(len(music[part][tick])):
+                    if music[part][tick][i] == 1.0:
+                        chord.append(i % 12)
+                parsed_part.append((chord.copy(), float(cnt) / 64))
+                chord.clear()
+                cnt = 0
+            cnt += 1
+        parsed_music[part] = parsed_part.copy()
+    return parsed_music.copy()
+
+
 def check_tonality(separate_track):
     """
     This function checks the tonality of notes of melody.

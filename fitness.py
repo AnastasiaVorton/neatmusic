@@ -1,10 +1,13 @@
 import random
 
+
 def gen_test(size):
     return [random.choice([0.0, 1.0]) for _ in range(10)]
 
+
 def answer_test(test):
     return [float((i % 2 != 0) ^ bool(round(j))) for i, j in enumerate(test)]
+
 
 def is_valid(test) -> bool:
     start = True
@@ -13,6 +16,7 @@ def is_valid(test) -> bool:
             return False
         start = not start
     return True
+
 
 def eval_function(net) -> float:
     cur = 0
@@ -136,26 +140,25 @@ def music_parser(music):
     :param music: given music
     :return: parsed list of notes
     """
-    # music = [[1, 3, 5], [13, 3, 5], [15, 3, 2]]
-    parsed_music = []
-    i = 0
-    for note in range(len(music)):
-        note = i + 1
-        if note == len(music):
-            break
+    parsed_music = {}
+    for part in range(len(music)):
+        cnt = 1
         chord = []
-        while i < len(music):
-            if i == len(music) - 1:
-                chord.append(music[i][0])
-                parsed_music.append(chord.copy())
-                i += 1
-                break
-            if music[i][1] != music[i + 1][1]:
-                chord.append(music[i][0])
-                parsed_music.append(chord.copy())
-                i += 1
-                break
-            else:
-                chord.append(music[i][0])
-            i += 1
-    return parsed_music
+        parsed_part = []
+        for tick in range(len(music[part])):
+            end_of_chord = False
+            if tick != len(music[part]) - 1:
+                for i in range(len(music[part][tick])):
+                    if music[part][tick][i] != music[part][tick + 1][i]:
+                        end_of_chord = True
+                        break
+            if end_of_chord or tick == len(music[part]) - 1:
+                for i in range(len(music[part][tick])):
+                    if music[part][tick][i] == 1.0:
+                        chord.append(i % 12)
+                parsed_part.append((chord.copy(), float(cnt) / 64))
+                chord.clear()
+                cnt = 0
+            cnt += 1
+        parsed_music[part] = parsed_part.copy()
+    return parsed_music.copy()
