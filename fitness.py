@@ -64,31 +64,38 @@ def check_tonality(separate_track):
     return perc_good
 
 
-def check_notes_number(separate_track):
+def check_notes_number(instrument, separate_track):
     """
     Checks if the number of notes in chord less or equal to 4.
     :return: The value of correctness (in percents).
     """
     num_good = 0
     num_bad = 0
-    for chord in separate_track:
-        if len(chord[0]) >= 5:
-            num_bad += 1
-        else:
-            num_good += 1
+    # check if bass guitar
+    if instrument == 32:
+        for chord in separate_track:
+            if len(chord[0]) >= 2:
+                num_bad += 1
+            else:
+                num_good += 1
+    else:  # check if piano or rhythm guitar
+        for chord in separate_track:
+            if len(chord[0]) >= 5:
+                num_bad += 1
+            else:
+                num_good += 1
     print('good: ', num_good, 'bad: ', num_bad)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / len(separate_track)
     return perc_good
 
 
-def check_intervals(separate_track):
+def check_chord_intervals(separate_track):
     """
     Checks the difference between notes in each chord and between neighbour chords.
     :param separate_track:
     :return:
     """
-    # CHECK 'result' VALUE
     result = 0.0
     for chord in separate_track:
         chord.sort()
@@ -109,8 +116,8 @@ def check_intervals(separate_track):
 
 
 def fitness_function(music):
-    # CHECK 'result' VALUE
     """
+        instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
         # DONE - Tonality: Check all notes if they belong to tonality or not
         # DONE - Number of simultaneously played notes 
         . Intervals in chords:
@@ -122,13 +129,19 @@ def fitness_function(music):
     # 'music' is a map of lists.
     # Check for tonality
     results = []
-    parsed_music = music_parser(music)
     result = 0.0
-    for s_track in music:
-        result += check_tonality(music[s_track])
-        result += check_notes_number(music[s_track])
-        result += check_intervals(music[s_track])
-        results.append(result)
+    for instr, notes in music.items():
+        # check for piano and rhythm guitar
+        if instr == 0 or instr == 25:
+            result += check_tonality(notes)
+            result += check_notes_number(instr, notes)
+            result += check_chord_intervals(notes)
+            results.append((instr, result))
+        # check for bass
+        elif instr == 32:
+            result += check_tonality(notes)
+            result += check_notes_number(instr, notes)
+            results.append((instr, result))
     return result
 
 
