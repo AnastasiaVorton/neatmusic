@@ -16,9 +16,11 @@ for i in range(15):
         chords.append(([random.choice(notes), random.choice(notes)], random.choice(durations)))
     elif 0.4 < p < 0.6:
         chords.append(([random.choice(notes), random.choice(notes), random.choice(notes)], random.choice(durations)))
+        chords.append(([60, 64, 67], random.choice(durations)))
     elif 0.6 < p < 0.8:
         chords.append(([random.choice(notes), random.choice(notes), random.choice(notes), random.choice(notes)],
                        random.choice(durations)))
+        chords.append(([59, 62, 65, 68], random.choice(durations)))
     elif 0.8 < p < 1.0:
         chords.append(([random.choice(notes), random.choice(notes), random.choice(notes), random.choice(notes),
                         random.choice(notes)], random.choice(durations)))
@@ -99,5 +101,77 @@ def check_notes_number(separate_track):
     return perc_good
 
 
-print('tonality fitness: ', check_tonality(chords))
-print('number of notes fitness', check_notes_number(chords))
+def is_in_tonality(note):
+    good_notes = [0, 2, 4, 5, 7, 9, 11]
+    if note in good_notes:
+        return True
+    else:
+        return False
+
+
+def check_chord_intervals(separate_track):
+    """
+        Checks the difference between notes in each chord.
+        :param separate_track:
+        :return:
+        """
+    num_good = 0
+    total_chords = 0
+    for chord in separate_track:
+        if len(chord[0]) == 3:
+            total_chords += 1
+            first = chord[0][0]
+            second = chord[0][1]
+            third = chord[0][2]
+            if is_in_tonality(first % 12):
+                # check if C dur
+                if first % 12 == 0 and second == first + 4 and third == second + 3:
+                    num_good += 1
+                # check if D moll
+                elif first % 12 == 2 and second == first + 3 and third == second + 4:
+                    num_good += 1
+                # check if E moll
+                elif first % 12 == 4 and second == first + 3 and third == second + 4:
+                    num_good += 1
+                # check if F dur
+                elif first % 12 == 5 and second == first + 4 and third == second + 3:
+                    num_good += 1
+                # check if G dur
+                elif first % 12 == 7 and second == first + 4 and third == second + 3:
+                    num_good += 1
+                # check if A moll
+                elif first % 12 == 9 and second == first + 3 and third == second + 4:
+                    num_good += 1
+                # check if H moll reduced
+                elif first % 12 == 11 and second == first + 3 and third == second + 3:
+                    num_good += 1
+        elif len(chord[0]) == 4:
+            print(chord[0])
+            total_chords += 1
+            first = chord[0][0]
+            second = chord[0][1]
+            third = chord[0][2]
+            fourth = chord[0][3]
+            # assuming natural C major and accepting only half-diminished leading seventh chords
+            if is_in_tonality(first % 12):
+                # check if MVII7
+                if first % 12 == 11 and second == first + 3 and third == second + 3 and fourth == third + 3:
+                    num_good += 1
+                # check if MVII65
+                if first % 12 == 2 and second == first + 3 and third == second + 3 and fourth == third + 2:
+                    num_good += 1
+                # check if MVII43
+                if first % 12 == 5 and second == first + 4 and third == second + 2 and fourth == third + 3:
+                    num_good += 1
+                # check if MVII2
+                if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
+                    num_good += 1
+    print('good: ', num_good)
+    # ratio of good duration of musical units to total number of units
+    perc_good = num_good / total_chords
+    return perc_good
+
+
+# print('tonality fitness: ', check_tonality(chords))
+# print('number of notes fitness', check_notes_number(chords))
+print(check_chord_intervals(chords))

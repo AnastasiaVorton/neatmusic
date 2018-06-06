@@ -72,7 +72,7 @@ def check_notes_number(instrument, separate_track):
     num_good = 0
     num_bad = 0
     # check if bass guitar
-    if instrument == 32:
+    if instrument == 33:
         for chord in separate_track:
             if len(chord[0]) >= 2:
                 num_bad += 1
@@ -90,29 +90,75 @@ def check_notes_number(instrument, separate_track):
     return perc_good
 
 
+def is_in_tonality(note):
+    good_notes = [0, 2, 4, 5, 7, 9, 11]
+    if note in good_notes:
+        return True
+    else:
+        return False
+
+
 def check_chord_intervals(separate_track):
     """
-    Checks the difference between notes in each chord and between neighbour chords.
-    :param separate_track:
-    :return:
-    """
-    result = 0.0
+        Checks the difference between notes in each chord.
+        :param separate_track:
+        :return:
+        """
+    num_good = 0
+    total_chords = 0
     for chord in separate_track:
-        chord.sort()
-    # Inside of each chord.
-    for chord in separate_track:
-        for i in range(len(chord)):
-            temp = len(chord)
-            if i >= (temp - 1): break
-            if abs(chord[i] - chord[i + 1]) > 12:
-                result += 200
-    # Interval between chords.
-    for i in range(len(separate_track)):
-        if i == (len(separate_track) - 1):
-            break
-        if abs(separate_track[i][0] - separate_track[i + 1][0]) > 12:
-            result += 300
-    return result
+        if len(chord[0]) == 3:
+            total_chords += 1
+            first = chord[0][0]
+            second = chord[0][1]
+            third = chord[0][2]
+            if is_in_tonality(first % 12):
+                # check if C dur
+                if first % 12 == 0 and second == first + 4 and third == second + 3:
+                    num_good += 1
+                # check if D moll
+                elif first % 12 == 2 and second == first + 3 and third == second + 4:
+                    num_good += 1
+                # check if E moll
+                elif first % 12 == 4 and second == first + 3 and third == second + 4:
+                    num_good += 1
+                # check if F dur
+                elif first % 12 == 5 and second == first + 4 and third == second + 3:
+                    num_good += 1
+                # check if G dur
+                elif first % 12 == 7 and second == first + 4 and third == second + 3:
+                    num_good += 1
+                # check if A moll
+                elif first % 12 == 9 and second == first + 3 and third == second + 4:
+                    num_good += 1
+                # check if H moll reduced
+                elif first % 12 == 11 and second == first + 3 and third == second + 3:
+                    num_good += 1
+        elif len(chord[0]) == 4:
+            print(chord[0])
+            total_chords += 1
+            first = chord[0][0]
+            second = chord[0][1]
+            third = chord[0][2]
+            fourth = chord[0][3]
+            # assuming natural C major and accepting only half-diminished leading seventh chords
+            if is_in_tonality(first % 12):
+                # check if MVII7
+                if first % 12 == 11 and second == first + 3 and third == second + 3 and fourth == third + 3:
+                    num_good += 1
+                # check if MVII65
+                if first % 12 == 2 and second == first + 3 and third == second + 3 and fourth == third + 2:
+                    num_good += 1
+                # check if MVII43
+                if first % 12 == 5 and second == first + 4 and third == second + 2 and fourth == third + 3:
+                    num_good += 1
+                # check if MVII2
+                if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
+                    num_good += 1
+    print('good: ', num_good)
+    # ratio of good duration of musical units to total number of units
+    perc_good = num_good / total_chords
+    return perc_good
 
 
 def fitness_function(music):
@@ -128,24 +174,22 @@ def fitness_function(music):
     """
     # 'music' is a map of lists.
     # Check for tonality
-    results = []
+    results = {}
     result = 0.0
     for instr, notes in music.items():
         # check for piano and rhythm guitar
-        if instr == 0 or instr == 25:
+        if instr == 1 or instr == 26:
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
             result += check_chord_intervals(notes)
-            results.append((instr, result))
+            results[instr] = result
         # check for bass
-        elif instr == 32:
+        elif instr == 33:
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
-            results.append((instr, result))
+            results[instr] = result
     return result
 
-
-# {0: [[1, 3, 5], [13, 3, 5], [15, 3, 2], [5]]}
 
 def music_parser(music):
     """
