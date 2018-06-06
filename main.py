@@ -7,13 +7,14 @@ from evaluation import *
 from multipleworld import *
 from midi_reader import read_all_dataset
 
+
 def main():
     # Config and data initialization
     num_of_octaves = int(input("Please enter the number of octaves you want your music to be generated: "))
     num_of_instruments = int(input("Please enter the number of instruments you want to generate: "))
     config = create_config(num_of_octaves, num_of_instruments)
     instruments = [i for i in range(num_of_instruments)]
-    data = read_all_dataset()
+    data = read_all_dataset(num_of_octaves)
 
     # Multiple world initialization
     p = Multipleworld(config, instruments)
@@ -23,7 +24,7 @@ def main():
     p.add_reporter(Checkpointer(50))
 
     # Running and result handling
-    winner = p.run(evaluate_genomes, 3)
+    winner = p.run(lambda x, y: evaluate_genomes(x, y, data), 3)
     print(winner)
 
 

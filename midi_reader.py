@@ -48,4 +48,4 @@ def read_all_dataset(number_of_octaves=1, ticks_per_beat=4):
     :param ticks_per_beat:
     :return:
     """
-    return [read_file(f, number_of_octaves, ticks_per_beat) for f in dataset_list()]
+    return [m for m in [read_file(f, number_of_octaves, ticks_per_beat) for f in dataset_list()] if m]
