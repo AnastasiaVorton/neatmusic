@@ -37,5 +37,5 @@ class MidiParser:
                         self.output.append(nn_input)
 
 
-output = MidiParser('dataset/X Files.mid', 2, 8)
+output = MidiParser('dataset/X Files.mid', 1, 8)
 print(output.output)
