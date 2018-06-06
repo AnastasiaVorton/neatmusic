@@ -3,6 +3,8 @@ import random
 from neat import *
 from neat.nn import MLRecurrentNetwork
 
+from fitness import fitness_function, music_parser
+
 
 def evaluate_genomes(populations: dict, config: Config, dataset: list):
     instruments = list(populations.keys())
@@ -29,9 +31,13 @@ def evaluate_genomes(populations: dict, config: Config, dataset: list):
 
 
 def evaluate_world(world: dict, dataset: list) -> float:
+    sum = 0.0
     for melody in dataset:
         tracks = generate_tracks(world, melody)
-    return 0.0
+        cleaned = {x: music_parser(y) for x, y in tracks.items()}
+        fitness = fitness_function(cleaned)
+        sum += fitness
+    return sum
 
 
 def generate_tracks(world: dict, melody) -> dict:
@@ -39,7 +45,7 @@ def generate_tracks(world: dict, melody) -> dict:
     # First tick sends zeroes for inputs at generated instruments
     inputs = melody[0] + [0] * sum([len(x.output_nodes) for x in world.values()])
     for instrument, list in tracks.items():
-        output = [round(i) for i in world[instrument].activate(inputs)]
+        output = [float(round(i)) for i in world[instrument].activate(inputs)]
         list.append(output)
     # Following ticks use previous outputs
     for tick, melody_inputs in enumerate(melody[1:]):
@@ -47,6 +53,6 @@ def generate_tracks(world: dict, melody) -> dict:
         for i in tracks.values():
             inputs.extend(i[tick])
         for instrument, list in tracks.items():
-            output = [round(i) for i in world[instrument].activate(inputs)]
+            output = [float(round(i)) for i in world[instrument].activate(inputs)]
             list.append(output)
     return tracks

@@ -95,7 +95,7 @@ def check_chord_intervals(separate_track):
                 # check if A moll
                 elif first % 12 == 9 and second == first + 3 and third == second + 4:
                     num_good += 1
-                # check if H moll reduced
+                # check if H moll diminished
                 elif first % 12 == 11 and second == first + 3 and third == second + 3:
                     num_good += 1
         elif len(chord[0]) == 4:
