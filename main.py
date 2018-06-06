@@ -32,9 +32,7 @@ def create_config(num_of_octaves: int, num_of_instruments: int) -> Config:
 
     num_inputs = num_of_octaves * 12 * (num_of_instruments + 1)
     num_outputs = num_of_octaves * 12
-    config.genome_config.num_inputs = num_inputs
-    config.genome_config.num_outputs = num_outputs
-    config.save(conf_path)
+    config.set_num_inputs_outputs(num_inputs, num_outputs)
 
     return config
 

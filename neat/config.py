@@ -215,3 +215,15 @@ class Config(object):
 
             f.write('\n[{0}]\n'.format(self.reproduction_type.__name__))
             self.reproduction_type.write_config(f, self.reproduction_config)
+
+    def set_num_inputs_outputs(self, num_inputs, num_outputs):
+        self.set_num_inputs(num_inputs)
+        self.set_num_outputs(num_outputs)
+
+    def set_num_inputs(self, num_inputs):
+        self.genome_config.num_inputs = num_inputs
+        self.genome_config.input_keys = [-i - 1 for i in range(num_inputs)]
+
+    def set_num_outputs(self, num_outputs):
+        self.genome_config.num_outputs = num_outputs
+        self.genome_config.output_keys = [i for i in range(num_outputs)]
