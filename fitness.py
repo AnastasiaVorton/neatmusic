@@ -175,8 +175,8 @@ def fitness_function(music):
     # 'music' is a map of lists.
     # Check for tonality
     results = {}
-    result = 0.0
     for instr, notes in music.items():
+        result = 0.0
         # check for piano and rhythm guitar
         if instr == 1 or instr == 26:
             result += check_tonality(notes)
@@ -188,7 +188,7 @@ def fitness_function(music):
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
             results[instr] = result
-    return result
+    return results
 
 
 def music_parser(music):
