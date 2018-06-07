@@ -16,7 +16,7 @@ def evaluate_genomes(populations: dict, config: Config, dataset: list):
     nns = {name: [MLRecurrentNetwork.create(genome, config) for _, genome in genomes]
            for name, genomes in populations.items()}
 
-    # Combine a neural networks with other neural networks
+    # Combine a neural network with other neural networks
     shuffled = {a: list(range(pop_size)) for a in nns.keys()}
     for i in shuffled.values():
         random.shuffle(i)

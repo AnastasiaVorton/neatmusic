@@ -8,7 +8,7 @@ def check_tonality(separate_track):
     This function checks the tonality of notes of melody.
     :return: The value of correctness (in percents).
     """
-    # Tonality: C
+    # key: C maj
     good_notes = [0, 2, 4, 5, 7, 9, 11]  # C major Tonality notes
     num_good = 0
     num_bad = 0
