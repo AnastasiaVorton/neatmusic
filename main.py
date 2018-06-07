@@ -27,7 +27,7 @@ def main():
     p.add_reporter(Checkpointer(50))
 
     # Running and result handling
-    winner = p.run(lambda x, y: evaluate_genomes(x, y, training_set), 3)
+    winner = p.run(lambda x, y: evaluate_genomes(x, y, training_set), 100)
     print(winner)
 
 

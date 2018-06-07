@@ -37,7 +37,7 @@ def evaluate_world(world: dict, dataset: list) -> float:
         #cleaned = {x: music_parser(y) for x, y in tracks.items()}
         cleaned = music_parser(tracks)
         fitness = fitness_function(cleaned)
-        out += sum(fitness) / len(fitness)
+        out += sum(fitness.values()) / len(fitness)
     return out
 
 

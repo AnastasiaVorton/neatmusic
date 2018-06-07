@@ -22,7 +22,6 @@ def check_tonality(separate_track):
             num_good += 1
         else:
             num_bad += 1
-    print('good: ', num_good, 'bad: ', num_bad)
     # ratio of good notes to total number of notes
     perc_good = num_good / len(notes)
     return perc_good
@@ -48,7 +47,6 @@ def check_notes_number(instrument, separate_track):
                 num_bad += 1
             else:
                 num_good += 1
-    print('good: ', num_good, 'bad: ', num_bad)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / len(separate_track)
     return perc_good
@@ -118,12 +116,11 @@ def check_chord_intervals(separate_track):
                 # check if MVII2
                 if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
                     num_good += 1
-    print('good: ', num_good)
     # ratio of good duration of musical units to total number of units
     if total_chords > 0:
         perc_good = num_good / total_chords
     else:
-        perc_good = 1.0
+        perc_good = 0.0
     return perc_good
 
 
