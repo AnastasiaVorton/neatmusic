@@ -117,7 +117,7 @@ def is_in_tonality(note):
         return False
 
 
-def check_chord_intervals(separate_track):
+def check_chord_intervals(instrument, separate_track):
     """
         Checks the difference between notes in each chord.
         :param separate_track:
@@ -133,25 +133,32 @@ def check_chord_intervals(separate_track):
             third = chord[0][2]
             if is_in_tonality(first % 12):
                 # check if C dur
-                if first % 12 == 0 and second == first + 4 and third == second + 3:
+                if (instrument == 1 and first % 12 == 0 and second == first + 4 and third == second + 3) or (
+                                        instrument == 26 and first % 12 == 0 and second % 12 == first % 12 + 4 and third % 12 == second % 12 + 3):
                     num_good += 1
                 # check if D moll
-                elif first % 12 == 2 and second == first + 3 and third == second + 4:
+                elif (instrument == 1 and first % 12 == 2 and second == first + 3 and third == second + 4) or (
+                                        instrument == 26 and first % 12 == 2 and second % 12 == first % 12 + 3 and third % 12 == second % 12 + 4):
                     num_good += 1
                 # check if E moll
-                elif first % 12 == 4 and second == first + 3 and third == second + 4:
+                elif (instrument == 1 and first % 12 == 4 and second == first + 3 and third == second + 4) or (
+                                        instrument == 26 and first % 12 == 4 and second % 12 == first % 12 + 3 and third % 12 == second % 12 + 4):
                     num_good += 1
                 # check if F dur
-                elif first % 12 == 5 and second == first + 4 and third == second + 3:
+                elif (instrument == 1 and first % 12 == 5 and second == first + 4 and third == second + 3) or (
+                                        instrument == 26 and first % 12 == 5 and second % 12 == first % 12 + 4 and third % 12 == second % 12 + 3):
                     num_good += 1
                 # check if G dur
-                elif first % 12 == 7 and second == first + 4 and third == second + 3:
+                elif (instrument == 1 and first % 12 == 7 and second == first + 4 and third == second + 3) or (
+                                        instrument == 26 and first % 12 == 7 and second % 12 == first % 12 + 4 and third % 12 == second % 12 + 3):
                     num_good += 1
                 # check if A moll
-                elif first % 12 == 9 and second == first + 3 and third == second + 4:
+                elif (instrument == 1 and first % 12 == 9 and second == first + 3 and third == second + 4) or (
+                                        instrument == 26 and first % 12 == 9 and second % 12 == first % 12 + 3 and third % 12 == second % 12 + 4):
                     num_good += 1
                 # check if H moll reduced
-                elif first % 12 == 11 and second == first + 3 and third == second + 3:
+                elif (instrument == 1 and first % 12 == 11 and second == first + 3 and third == second + 3) or (
+                                        instrument == 26 and first % 12 == 11 and second % 12 == first % 12 + 3 and third % 12 == second % 12 + 3):
                     num_good += 1
         elif len(chord[0]) == 4:
             total_chords += 1
@@ -162,16 +169,24 @@ def check_chord_intervals(separate_track):
             # assuming natural C major and accepting only half-diminished leading seventh chords
             if is_in_tonality(first % 12):
                 # check if MVII7
-                if first % 12 == 11 and second == first + 3 and third == second + 3 and fourth == third + 3:
+                if (
+                                            instrument == 1 and first % 12 == 11 and second == first + 3 and third == second + 3 and fourth == third + 3) or (
+                                            instrument == 26 and first % 12 == 11 and second % 12 == first % 12 + 3 and third % 12 == second % 12 + 3 and fourth % 12 == third % 12 + 3):
                     num_good += 1
                 # check if MVII65
-                if first % 12 == 2 and second == first + 3 and third == second + 3 and fourth == third + 2:
+                if (
+                                            instrument == 1 and first % 12 == 2 and second == first + 3 and third == second + 3 and fourth == third + 2) or (
+                                            instrument == 1 and first % 12 == 2 and second % 12 == first % 12 + 3 and third % 12 == second % 12 + 3 and fourth % 12 == third % 12 + 2):
                     num_good += 1
                 # check if MVII43
-                if first % 12 == 5 and second == first + 4 and third == second + 2 and fourth == third + 3:
+                if (
+                                            instrument == 1 and first % 12 == 5 and second == first + 4 and third == second + 2 and fourth == third + 3) or (
+                                            instrument == 26 and first % 12 == 5 and second % 12 == first % 12 + 4 and third % 12 == second % 12 + 2 and fourth % 12 == third % 12 + 3):
                     num_good += 1
                 # check if MVII2
-                if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
+                if (
+                                            instrument == 1 and first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4) or (
+                                            instrument == 26 and first % 12 == 9 and second % 12 == first % 12 + 2 and third % 12 == second % 12 + 3 and fourth % 12 == third % 12 + 4):
                     num_good += 1
     print('chords fitness: ', 'good: ', num_good)
     # ratio of good duration of musical units to total number of units
@@ -231,7 +246,7 @@ def fitness_function(num_of_octaves, music):
         if instr == 1 or instr == 26:
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
-            result += check_chord_intervals(notes)
+            result += check_chord_intervals(instr, notes)
             if num_of_octaves >= 2:
                 result += check_octave_pitch(num_of_octaves, instr, notes)
             results[instr] = result
