@@ -124,7 +124,42 @@ def check_chord_intervals(separate_track):
     return perc_good
 
 
-def fitness_function(music):
+def check_octave_pitch(num_of_octaves, instrument, separate_track):
+    num_good = 0
+    notes = []
+    for chord in separate_track:
+        # represent all notes as a single list and represent them as values from 0 to 11
+        for note in chord[0]:
+            notes.append(note)
+    if instrument == 1:  # piano should be lower than rhythm guitar
+        for note in notes:
+            if num_of_octaves == 2:
+                if note in range(0, int(num_of_octaves * 0.75 * 12)):
+                    num_good += 1
+            if num_of_octaves == 3:
+                if note in range(0, 25):
+                    num_good += 1
+            if num_of_octaves == 4:
+                if note in range(0, 31):
+                    num_good += 1
+    elif instrument == 26:  # piano should be lower than rhythm guitar
+        for note in notes:
+            if num_of_octaves == 2:
+                if note in range(6, num_of_octaves * 12 + 1):
+                    num_good += 1
+            if num_of_octaves == 3:
+                if note in range(12, num_of_octaves * 12 + 1):
+                    num_good += 1
+            if num_of_octaves == 4:
+                if note in range(17, num_of_octaves * 12 + 1):
+                    num_good += 1
+    # ratio of good notes to total number of notes
+    perc_good = num_good / len(notes)
+    return perc_good
+
+
+
+def fitness_function(num_of_octaves, music):
     """
         instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
         # DONE - Tonality: Check all notes if they belong to tonality or not
@@ -143,6 +178,9 @@ def fitness_function(music):
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
             result += check_chord_intervals(notes)
+            if num_of_octaves >= 2:
+                result += check_octave_pitch(num_of_octaves, instr, notes)
+            results[instr] = result
             results[instr] = result
         # check for bass
         elif instr == 33:
@@ -173,7 +211,7 @@ def music_parser(music):
             if end_of_chord or tick == len(music[part]) - 1:
                 for i in range(len(music[part][tick])):
                     if music[part][tick][i] == 1.0:
-                        chord.append(i % 12)
+                        chord.append(i)
                 parsed_part.append((chord.copy(), float(cnt) / 64))
                 chord.clear()
                 cnt = 0
