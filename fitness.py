@@ -1,3 +1,4 @@
+import random
 """
     NEXT CODE IS IMPLEMENTATION OF FITNESS FUNCTION
 """
@@ -174,6 +175,34 @@ def check_octave_pitch(num_of_octaves, instrument, separate_track):
     return perc_good
 
 
+def check_intervals(separate_track):
+    num_good = 0
+    total_intervals = 0
+    for chord in separate_track:
+        if len(chord[0]) == 2:
+            total_intervals += 1
+            first = chord[0][0]
+            second = chord[0][1]
+            p = random.uniform(0.0, 1.0)
+            if is_in_tonality(first % 12):
+                #  checks for consonants
+                if (second % 12 == first % 12 + 3) or (second % 12 == first % 12 + 4) or (
+                                second % 12 == first % 12 + 5) or (second % 12 == first % 12 + 7) or (
+                                second % 12 == first % 12 + 8) or (second % 12 == first % 12 + 9) or (
+                                second % 12 == first % 12):
+                    num_good += 1
+                else:
+                    if 0.0 < p < 0.25:
+                        num_good += 1
+    print('interval fitness: ', 'good: ', num_good)
+    # ratio of good duration of musical units to total number of units
+    if total_intervals > 0:
+        perc_good = num_good / total_intervals
+    else:
+        perc_good = 0.0
+    return perc_good
+
+
 def fitness_function(num_of_octaves, music):
     """
         instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
@@ -195,6 +224,7 @@ def fitness_function(num_of_octaves, music):
             result += check_chord_intervals(instr, notes)
             if num_of_octaves >= 2:
                 result += check_octave_pitch(num_of_octaves, instr, notes)
+            result += check_intervals(notes)
             results[instr] = result
         # check for bass
         elif instr == 33:

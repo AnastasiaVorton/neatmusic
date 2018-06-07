@@ -118,11 +118,7 @@ def is_in_tonality(note):
 
 
 def check_chord_intervals(instrument, separate_track):
-    """
-        Checks the difference between notes in each chord.
-        :param separate_track:
-        :return:
-        """
+    """Checks the difference between notes in each chord."""
     num_good = 0
     total_chords = 0
     for chord in separate_track:
@@ -236,14 +232,24 @@ def check_intervals(separate_track):
             total_intervals += 1
             first = chord[0][0]
             second = chord[0][1]
-            if is_in_tonality(first%12):
-                if second % 12 == (first % 12 + 3 or first % 12 + 4 or first % 12 + 5 or first % 12 + 7 or first % 12 + 8 or first % 12 + 9 or first % 12):
+            p = random.uniform(0.0, 1.0)
+            if is_in_tonality(first % 12):
+                #  checks for consonants
+                if (second % 12 == first % 12 + 3) or (second % 12 == first % 12 + 4) or (
+                                second % 12 == first % 12 + 5) or (second % 12 == first % 12 + 7) or (
+                                second % 12 == first % 12 + 8) or (second % 12 == first % 12 + 9) or (
+                        second % 12 == first % 12):
                     num_good += 1
+                else:
+                    if 0.0 < p < 0.25:
+                        num_good += 1
     print('interval fitness: ', 'good: ', num_good)
     # ratio of good duration of musical units to total number of units
-    perc_good = num_good / total_intervals
+    if total_intervals > 0:
+        perc_good = num_good / total_intervals
+    else:
+        perc_good = 0.0
     return perc_good
-
 
 
 def fitness_function(num_of_octaves, music):
@@ -280,8 +286,8 @@ def fitness_function(num_of_octaves, music):
 music = {26: chords}
 # print('tonality fitness: ', check_tonality(chords))
 # print('number of notes fitness', check_notes_number(chords))
-# print(check_chord_intervals(chords))
-print(check_intervals(notes))
+# print(check_chord_intervals(1, chords))
+print(check_intervals(chords))
 oktaves = 3
 
 # print(fitness_function(oktaves, music))
