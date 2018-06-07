@@ -31,13 +31,14 @@ def evaluate_genomes(populations: dict, config: Config, dataset: list):
 
 
 def evaluate_world(world: dict, dataset: list) -> float:
-    sum = 0.0
+    out = 0.0
     for melody in dataset:
         tracks = generate_tracks(world, melody)
-        cleaned = {x: music_parser(y) for x, y in tracks.items()}
+        #cleaned = {x: music_parser(y) for x, y in tracks.items()}
+        cleaned = music_parser(tracks)
         fitness = fitness_function(cleaned)
-        sum += fitness
-    return sum
+        out += sum(fitness) / len(fitness)
+    return out
 
 
 def generate_tracks(world: dict, melody) -> dict:

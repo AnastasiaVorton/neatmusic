@@ -120,7 +120,10 @@ def check_chord_intervals(separate_track):
                     num_good += 1
     print('good: ', num_good)
     # ratio of good duration of musical units to total number of units
-    perc_good = num_good / total_chords
+    if total_chords > 0:
+        perc_good = num_good / total_chords
+    else:
+        perc_good = 1.0
     return perc_good
 
 
@@ -159,7 +162,7 @@ def music_parser(music):
     :return: parsed list of notes
     """
     parsed_music = {}
-    for part in range(len(music)):
+    for part in music.keys():
         cnt = 1
         chord = []
         parsed_part = []
