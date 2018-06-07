@@ -133,7 +133,10 @@ def check_chord_intervals(instrument, separate_track):
                     num_good += 1
     print('chords fitness: ', 'good: ', num_good)
     # ratio of good duration of musical units to total number of units
-    perc_good = num_good / total_chords
+    if total_chords > 0:
+        perc_good = num_good / total_chords
+    else:
+        perc_good = 0.0
     return perc_good
 
 
@@ -175,7 +178,7 @@ def fitness_function(num_of_octaves, music):
     """
         instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
         # DONE - Tonality: Check all notes if they belong to tonality or not
-        # DONE - Number of simultaneously played notes
+        # DONE - Number of simultaneously played notes 
         # DONE - Intervals in chords:
         . Intervals in 2 note combinations
         . Difference in interval between chords. (разрешения)
@@ -189,10 +192,9 @@ def fitness_function(num_of_octaves, music):
         if instr == 1 or instr == 26:
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
-            result += check_chord_intervals(notes)
+            result += check_chord_intervals(instr, notes)
             if num_of_octaves >= 2:
                 result += check_octave_pitch(num_of_octaves, instr, notes)
-            results[instr] = result
             results[instr] = result
         # check for bass
         elif instr == 33:
