@@ -228,6 +228,24 @@ def check_octave_pitch(num_of_octaves, instrument, separate_track):
     return perc_good
 
 
+def check_intervals(separate_track):
+    num_good = 0
+    total_intervals = 0
+    for chord in separate_track:
+        if len(chord[0]) == 2:
+            total_intervals += 1
+            first = chord[0][0]
+            second = chord[0][1]
+            if is_in_tonality(first%12):
+                if second % 12 == (first % 12 + 3 or first % 12 + 4 or first % 12 + 5 or first % 12 + 7 or first % 12 + 8 or first % 12 + 9 or first % 12):
+                    num_good += 1
+    print('interval fitness: ', 'good: ', num_good)
+    # ratio of good duration of musical units to total number of units
+    perc_good = num_good / total_intervals
+    return perc_good
+
+
+
 def fitness_function(num_of_octaves, music):
     """
         instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
@@ -249,6 +267,7 @@ def fitness_function(num_of_octaves, music):
             result += check_chord_intervals(instr, notes)
             if num_of_octaves >= 2:
                 result += check_octave_pitch(num_of_octaves, instr, notes)
+            result += check_intervals(notes)
             results[instr] = result
         # check for bass
         elif instr == 33:
@@ -262,6 +281,7 @@ music = {26: chords}
 # print('tonality fitness: ', check_tonality(chords))
 # print('number of notes fitness', check_notes_number(chords))
 # print(check_chord_intervals(chords))
+print(check_intervals(notes))
 oktaves = 3
 
-print(fitness_function(oktaves, music))
+# print(fitness_function(oktaves, music))
