@@ -1,39 +1,3 @@
-import random
-
-
-def gen_test(size):
-    return [random.choice([0.0, 1.0]) for _ in range(10)]
-
-
-def answer_test(test):
-    return [float((i % 2 != 0) ^ bool(round(j))) for i, j in enumerate(test)]
-
-
-def is_valid(test) -> bool:
-    start = True
-    for i, o in test:
-        if (o >= 0.5) == (start ^ (i >= 0.5)):
-            return False
-        start = not start
-    return True
-
-
-def eval_function(net) -> float:
-    cur = 0
-    for _ in range(10):
-        size = random.randint(8, 10)
-        val = size
-        test = gen_test(size)
-        answer = answer_test(test)
-        net.reset()
-        for i in range(size):
-            output = net.activate((test[i],))
-            val -= (output[0] - answer[i]) ** 2
-        val /= size
-        cur += val
-    return cur / 10
-
-
 """
     NEXT CODE IS IMPLEMENTATION OF FITNESS FUNCTION
 """
@@ -58,7 +22,6 @@ def check_tonality(separate_track):
             num_good += 1
         else:
             num_bad += 1
-    print('good: ', num_good, 'bad: ', num_bad)
     # ratio of good notes to total number of notes
     perc_good = num_good / len(notes)
     return perc_good
@@ -84,7 +47,6 @@ def check_notes_number(instrument, separate_track):
                 num_bad += 1
             else:
                 num_good += 1
-    print('good: ', num_good, 'bad: ', num_bad)
     # ratio of good duration of musical units to total number of units
     perc_good = num_good / len(separate_track)
     return perc_good
@@ -131,7 +93,7 @@ def check_chord_intervals(separate_track):
                 # check if A moll
                 elif first % 12 == 9 and second == first + 3 and third == second + 4:
                     num_good += 1
-                # check if H moll reduced
+                # check if H moll diminished
                 elif first % 12 == 11 and second == first + 3 and third == second + 3:
                     num_good += 1
         elif len(chord[0]) == 4:
@@ -154,9 +116,11 @@ def check_chord_intervals(separate_track):
                 # check if MVII2
                 if first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4:
                     num_good += 1
-    print('good: ', num_good)
     # ratio of good duration of musical units to total number of units
-    perc_good = num_good / total_chords
+    if total_chords > 0:
+        perc_good = num_good / total_chords
+    else:
+        perc_good = 0.0
     return perc_good
 
 
@@ -164,7 +128,7 @@ def fitness_function(music):
     """
         instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
         # DONE - Tonality: Check all notes if they belong to tonality or not
-        # DONE - Number of simultaneously played notes 
+        # DONE - Number of simultaneously played notes
         # DONE - Intervals in chords:
         . Intervals in 2 note combinations
         . Difference in interval between chords. (разрешения)
@@ -195,7 +159,7 @@ def music_parser(music):
     :return: parsed list of notes
     """
     parsed_music = {}
-    for part in range(len(music)):
+    for part in music.keys():
         cnt = 1
         chord = []
         parsed_part = []

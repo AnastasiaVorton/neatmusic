@@ -1,32 +1,43 @@
 import os
-import configparser
+import random
+import re
+
 from neat import *
 from neat.nn import MLRecurrentNetwork
 
-from fitness import *
-from multipleworld_neat import *
+from evaluation import *
+from multipleworld import *
+from midi_reader import read_all_dataset
+
 
 def main():
+    # Config and data initialization
     num_of_octaves = int(input("Please enter the number of octaves you want your music to be generated: "))
-    num_of_instruments = int(input("Please enter the number of instruments you want to generate: "))
+    instruments_input = input("Please enter the instruments' ids as a comma-separated list (e.g.: 1, 33): ")
+    instruments = [int(i) for i in re.split('[^0-9]+', instruments_input)]
+    config = create_config(num_of_octaves, len(instruments))
+    data = read_all_dataset(num_of_octaves)
+    training_set = random.sample(data, 5)
 
-    config = create_config(num_of_octaves, num_of_instruments)
-    instruments = [i for i in range(num_of_instruments)]
-
+    # Multiple world initialization
     p = Multipleworld(config, instruments)
-
     p.add_reporter(StdOutReporter(True))
     stats = StatisticsReporter()
     p.add_reporter(stats)
     p.add_reporter(Checkpointer(50))
 
-    winner = p.run(eval_genomes, 100)
-
+    # Running and result handling
+    winner = p.run(lambda x, y: evaluate_genomes(x, y, training_set), 100)
     print(winner)
 
 
 def create_config(num_of_octaves: int, num_of_instruments: int) -> Config:
-    """Sets ANN's parameters based on the number of octaves and instruments the user wants to generate"""
+    """
+    Sets ANN's parameters based on the number of octaves and instruments the user wants to generate
+    :param num_of_octaves:
+    :param num_of_instruments:
+    :return: config with provided parameters
+    """
     conf_path = os.path.join(os.path.dirname(__file__), 'neat-config')
     config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
 
@@ -35,17 +46,6 @@ def create_config(num_of_octaves: int, num_of_instruments: int) -> Config:
     config.set_num_inputs_outputs(num_inputs, num_outputs)
 
     return config
-
-
-def build_generator_function(genome, config: Config):
-    return MLRecurrentNetwork.create(genome, config)
-
-
-def eval_genomes(populations, config):
-    for name, genomes in populations.items():
-        for genome_id, genome in genomes:
-            func = build_generator_function(genome, config)
-            genome.fitness = eval_function(func)
 
 
 if __name__ == "__main__":
