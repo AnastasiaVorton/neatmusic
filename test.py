@@ -34,11 +34,23 @@ def music_parser(music):
     :param music: given music
     :return: parsed list of notes
     """
+    # Rectify input music
+    for part in music.keys():
+        for tick in range(len(music[part])):
+            if tick % 2 == 0:
+                continue
+            for i in range(len(music[part][tick])):
+                if music[part][tick - 1][i] == 1.0:
+                    music[part][tick][i] = 1.0
+                else:
+                    music[part][tick][i] = 0.0
+    # Parse music
     parsed_music = {}
-    for part in range(len(music)):
+    for part in music.keys():
         cnt = 1
         chord = []
         parsed_part = []
+        note_start = 0
         for tick in range(len(music[part])):
             end_of_chord = False
             if tick != len(music[part]) - 1:
@@ -50,11 +62,13 @@ def music_parser(music):
                 for i in range(len(music[part][tick])):
                     if music[part][tick][i] == 1.0:
                         chord.append(i % 12)
-                parsed_part.append((chord.copy(), float(cnt) / 64))
+                parsed_part.append((chord.copy(), float(cnt) / 64, note_start))
+                note_start = tick + 1
                 chord.clear()
                 cnt = 0
             cnt += 1
-        parsed_music[part] = parsed_part.copy()
+        if not len(parsed_part) == 0:
+            parsed_music[part] = parsed_part.copy()
     return parsed_music.copy()
 
 
