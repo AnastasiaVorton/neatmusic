@@ -209,6 +209,7 @@ def music_parser(music):
     Parse list by the beginning.
     :param music: given music
     :return: parsed list of notes
+
     """
     # Rectify input music
     for part in music.keys():
