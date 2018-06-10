@@ -1,6 +1,12 @@
 from mido import Message, MidiFile, MidiTrack  # library imports
 
 
+def generate_and_save_midi(file_path, music, num_of_octaves, initial_track):
+    music.pop(0, None)
+    scaled_composition = scale_parts(music, num_of_octaves)
+    write_file(file_path, scaled_composition, initial_track)
+
+
 def scale_parts(music, num_of_octaves):
     """
     Scales values of pitches of each track depending on the associate instrument.
@@ -8,6 +14,7 @@ def scale_parts(music, num_of_octaves):
     :param num_of_octaves: number of octaves TODO: now works only with 1-3 octaves, make more general
     :return: generated tracks with scaled values of pitches
     """
+
     for instrument, track in music.items():
         offset = 0
         if instrument == 0:
@@ -24,10 +31,9 @@ def scale_parts(music, num_of_octaves):
     return music
 
 
-def write_file(file_path, music, initial_track=None):
+def write_file(file_path, music, initial_track):
     """
     Writes the generated music to a midi file
-    TODO: doesn't save the initial track yet, add this capability
     :param file_path: path to the file where midi will be stored
     :param music: the generated tracks
     :param initial_track: the initial track (not affected by any parser)
@@ -36,6 +42,7 @@ def write_file(file_path, music, initial_track=None):
     mid_file.ticks_per_beat = 16
     ticks_per_bar = 16 * 4
     i = 0
+    mid_file.tracks.append(initial_track)
     for instrument, track in music.items():
         mid_track = MidiTrack()
         mid_file.tracks.append(mid_track)

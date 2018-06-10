@@ -7,7 +7,24 @@ def dataset_list():
     return [f for f in os.listdir('dataset') if f.endswith('.mid') or f.endswith('.midi')]
 
 
-def read_file(file_path, number_of_octaves=1, ticks_per_beat=4):
+def get_original_track(file_path, ticks_per_beat=16):
+    """
+    retrieves the original track from a midi file without changes
+    :param ticks_per_beat:
+    :param file_path: path to the file
+    :return: the track (as an object of type specified in the mido library)
+    """
+    mid_file = MidiFile('dataset' + os.sep + file_path)  # MidiFile object creation specifying the path
+    ticks_per_atomic_duration = mid_file.ticks_per_beat / ticks_per_beat
+
+    track = mid_file.tracks[0]
+    for i in range(len(track)):
+        track[i].time = int(track[i].time / ticks_per_atomic_duration)
+
+    return track
+
+
+def read_file(file_path, number_of_octaves=1, ticks_per_beat=16):
     """
     Parse the file and return the input series for a neural network.
     :param file_path:
@@ -41,7 +58,7 @@ def read_file(file_path, number_of_octaves=1, ticks_per_beat=4):
     return output
 
 
-def read_all_dataset(number_of_octaves=1, ticks_per_beat=4):
+def read_all_dataset(number_of_octaves=1, ticks_per_beat=16):
     """
     Reads the whole dataset into a list of input series
     :param number_of_octaves:
