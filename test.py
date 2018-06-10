@@ -132,11 +132,7 @@ def is_in_tonality(note):
 
 
 def check_chord_intervals(instrument, separate_track):
-    """
-        Checks the difference between notes in each chord.
-        :param separate_track:
-        :return:
-        """
+    """Checks the difference between notes in each chord."""
     num_good = 0
     total_chords = 0
     for chord in separate_track:
@@ -242,22 +238,49 @@ def check_octave_pitch(num_of_octaves, instrument, separate_track):
     return perc_good
 
 
+def dissonance_check(first, second):
+    stsble = [0, 4, 7]
+    #  first is stable
+    if (first[0][0] % 12 in stsble) and (second[0][0] == first[0][0]):
+        if first[0][1] % 12 == 2 and (second[0][1] % 12 == 0 or second[0][1] % 12 == 4):
+            return True
+        if first[0][1] % 12 == 5 and (second[0][1] % 12 == 4 or second[0][1] % 12 == 7):
+            return True
+        if first[0][1] % 12 == 11 and second[0][1] % 12 == 0 :
+            return True
+    # first is unstable
+    if first[0][0] % 12 == 5 and first[0][1] % 12 == 7 and second[0][1] % 12 == 7 and (second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
+        return True
+
+
 def check_intervals(separate_track):
     num_good = 0
     total_intervals = 0
-    for chord in separate_track:
+    for index, chord in enumerate(separate_track):
         if len(chord[0]) == 2:
             total_intervals += 1
             first = chord[0][0]
             second = chord[0][1]
-            if is_in_tonality(first%12):
-                if second % 12 == (first % 12 + 3 or first % 12 + 4 or first % 12 + 5 or first % 12 + 7 or first % 12 + 8 or first % 12 + 9 or first % 12):
+            p = random.uniform(0.0, 1.0)
+            if is_in_tonality(first % 12):
+                #  checks for consonance
+                if (second % 12 == first % 12 + 3) or (second % 12 == first % 12 + 4) or (
+                                second % 12 == first % 12 + 5) or (second % 12 == first % 12 + 7) or (
+                                second % 12 == first % 12 + 8) or (second % 12 == first % 12 + 9) or (
+                                second % 12 == first % 12):
                     num_good += 1
+                else:  # checks for dissonance
+                    next_chord = separate_track[index+1]
+                    if len(next_chord[0]) == 2:
+                        if dissonance_check(chord, next_chord):
+                            num_good += 1
     print('interval fitness: ', 'good: ', num_good)
-    # ratio of good duration of musical units to total number of units
-    perc_good = num_good / total_intervals
+    # ratio of good intervals to total number of intervals
+    if total_intervals > 0:
+        perc_good = num_good / total_intervals
+    else:
+        perc_good = 0.0
     return perc_good
-
 
 
 def fitness_function(num_of_octaves, music):
@@ -294,8 +317,13 @@ def fitness_function(num_of_octaves, music):
 music = {26: chords}
 # print('tonality fitness: ', check_tonality(chords))
 # print('number of notes fitness', check_notes_number(chords))
-# print(check_chord_intervals(chords))
-print(check_intervals(notes))
-oktaves = 3
+# print(check_chord_intervals(1, chords))
+print(check_intervals(chords))
+# oktaves = 3
 
 # print(fitness_function(oktaves, music))
+
+# for index, chord in enumerate(chords):
+#     if index != len(chords)-1:
+#         next = chords[index + 1]
+#         print("now is ", chord[0], " next is: ", next[0])
