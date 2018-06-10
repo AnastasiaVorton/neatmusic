@@ -203,11 +203,11 @@ def check_intervals(separate_track):
                                 second % 12 == first % 12 + 8) or (second % 12 == first % 12 + 9) or (
                                 second % 12 == first % 12):
                     num_good += 1
-                else:  # checks for dissonance
-                    next_chord = separate_track[index+1]
-                    if len(next_chord[0]) == 2:
-                        if dissonance_check(chord, next_chord):
-                            num_good += 1
+                # checks for dissonance
+                next_chord = separate_track[index+1]
+                if len(next_chord[0]) == 2:
+                    if dissonance_check(chord, next_chord):
+                        num_good += 1
     # ratio of good intervals to total number of intervals
     if total_intervals > 0:
         perc_good = num_good / total_intervals
