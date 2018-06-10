@@ -131,7 +131,6 @@ def check_chord_intervals(instrument, separate_track):
                                             instrument == 1 and first % 12 == 9 and second == first + 2 and third == second + 3 and fourth == third + 4) or (
                                             instrument == 26 and first % 12 == 9 and second % 12 == first % 12 + 2 and third % 12 == second % 12 + 3 and fourth % 12 == third % 12 + 4):
                     num_good += 1
-    print('chords fitness: ', 'good: ', num_good)
     # ratio of good duration of musical units to total number of units
     if total_chords > 0:
         perc_good = num_good / total_chords
