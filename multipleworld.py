@@ -132,8 +132,7 @@ class Multipleworld(object):
 
                 # Divide the new population into species.
                 self.species[instrument].speciate(self.config, self.instruments_map[instrument], self.generation)
-
-            # self.reporters.end_generation(self.config, self.population, self.species)
+                self.reporters.end_generation(self.config, self.instruments_map[instrument], self.species[instrument])
 
             self.generation += 1
 

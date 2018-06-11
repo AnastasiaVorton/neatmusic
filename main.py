@@ -22,9 +22,8 @@ def main():
     # Multiple world initialization
     p = Multipleworld(config, instruments)
     p.add_reporter(StdOutReporter(True))
-    stats = StatisticsReporter()
-    p.add_reporter(stats)
-    p.add_reporter(Checkpointer(50))
+    p.add_reporter(StatisticsReporter())
+    p.add_reporter(Checkpointer(generation_interval=10, filename_prefix='checkpoint-'))
 
     # Running and result handling
     evaluator = Evaluator(num_of_octaves, training_set)
