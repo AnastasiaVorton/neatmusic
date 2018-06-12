@@ -181,10 +181,11 @@ def dissonance_check(first, second):
             return True
         if first[0][1] % 12 == 5 and (second[0][1] % 12 == 4 or second[0][1] % 12 == 7):
             return True
-        if first[0][1] % 12 == 11 and second[0][1] % 12 == 0 :
+        if first[0][1] % 12 == 11 and second[0][1] % 12 == 0:
             return True
     # first is unstable
-    if first[0][0] % 12 == 5 and first[0][1] % 12 == 7 and second[0][1] % 12 == 7 and (second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
+    if first[0][0] % 12 == 5 and first[0][1] % 12 == 7 and second[0][1] % 12 == 7 and (
+                second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
         return True
 
 
@@ -204,7 +205,7 @@ def check_intervals(separate_track):
                                 second % 12 == first % 12):
                     num_good += 1
                 # checks for dissonance
-                next_chord = separate_track[index+1]
+                next_chord = separate_track[index + 1]
                 if len(next_chord[0]) == 2:
                     if dissonance_check(chord, next_chord):
                         num_good += 1
@@ -214,6 +215,23 @@ def check_intervals(separate_track):
     else:
         perc_good = 0.0
     return perc_good
+
+
+def check_timestamp_fitness(main, second):
+    #  1 если больше 50% совпадают с аккордом, % есди беньше 50
+    # checks if a note in main melody and a chord in an instrument part start simultaneously
+    good = 0
+    for note in main:
+        for chord in second:
+            if chord[2] == note[2]:
+                good += 1
+                print(note, chord)
+    print('good: ', good, ', total: ', len(second))
+    perc_good = good / len(second)
+    if perc_good >= 0.5:
+        return 1.0
+    else:
+        return perc_good
 
 
 def fitness_function(num_of_octaves, music):
