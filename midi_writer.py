@@ -2,7 +2,7 @@ from mido import Message, MidiFile, MidiTrack  # library imports
 
 
 def generate_and_save_midi(file_path, music, num_of_octaves, initial_track):
-    music.pop(0, None)
+    # music.pop(0, None)
     scaled_composition = scale_parts(music, num_of_octaves)
     write_file(file_path, scaled_composition, initial_track)
 
@@ -50,9 +50,17 @@ def write_file(file_path, music, initial_track):
         i = i + 1
         mid_track.append(Message('program_change', channel=i, program=instrument))
         velocity = 100
+        possible_pause_offset = 0
         for chord, duration, _ in track:
-            for pitch in chord:
-                mid_track.append(Message('note_on', note=pitch, velocity=velocity, time=0))
+            if len(chord) == 0:
+                possible_pause_offset = int(duration * ticks_per_bar)
+            for i in range(len(chord)):
+                if i == 0:
+                    mid_track.append(Message('note_on', note=chord[i], velocity=velocity, time=possible_pause_offset))
+                    possible_pause_offset = 0
+                else:
+                    mid_track.append(Message('note_on', note=chord[i], velocity=velocity, time=0))
+
             for i in range(len(chord)):
                 if i == 0:
                     mid_track.append(Message('note_off', note=chord[i], velocity=velocity,
