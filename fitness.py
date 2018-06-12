@@ -217,7 +217,7 @@ def check_intervals(separate_track):
     return perc_good
 
 
-def check_timestamp_fitness(main, second):
+def check_timestamp_fitness(main, second, percents):
     #  1 если больше 50% совпадают с аккордом, % есди беньше 50
     # checks if a note in main melody and a chord in an instrument part start simultaneously
     good = 0
@@ -228,7 +228,7 @@ def check_timestamp_fitness(main, second):
                 print(note, chord)
     print('good: ', good, ', total: ', len(second))
     perc_good = good / len(second)
-    if perc_good >= 0.5:
+    if perc_good >= percents:
         return 1.0
     else:
         return perc_good
