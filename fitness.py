@@ -80,39 +80,6 @@ def check_chord_intervals(instrument, separate_track):
     return num_good / max(total_chords, 1)
 
 
-def check_octave_pitch(num_of_octaves, instrument, separate_track):
-    num_good = 0
-    notes = []
-    for chord in separate_track:
-        # represent all notes as a single list and represent them as values from 0 to 11
-        for note in chord[0]:
-            notes.append(note)
-    if instrument == 1:  # piano should be lower than rhythm guitar
-        for note in notes:
-            if num_of_octaves == 2:
-                if note in range(0, int(num_of_octaves * 0.75 * 12)):
-                    num_good += 1
-            if num_of_octaves == 3:
-                if note in range(0, 25):
-                    num_good += 1
-            if num_of_octaves == 4:
-                if note in range(0, 31):
-                    num_good += 1
-    elif instrument == 26:  # piano should be lower than rhythm guitar
-        for note in notes:
-            if num_of_octaves == 2:
-                if note in range(6, num_of_octaves * 12 + 1):
-                    num_good += 1
-            if num_of_octaves == 3:
-                if note in range(12, num_of_octaves * 12 + 1):
-                    num_good += 1
-            if num_of_octaves == 4:
-                if note in range(17, num_of_octaves * 12 + 1):
-                    num_good += 1
-    # ratio of good notes to total number of notes
-    return num_good / max(len(notes), 1)
-
-
 def dissonance_check(first, second):
     stsble = [0, 4, 7]
     #  first is stable
@@ -153,17 +120,18 @@ def check_intervals(separate_track):
     return num_good / max(total_intervals, 1)
 
 
-def fitness_function(num_of_octaves, music):
+def fitness_function(music):
     """
     instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
     # DONE - Tonality: Check all notes if they belong to tonality or not
     # DONE - Number of simultaneously played notes
     # DONE - Intervals in chords:
-    . Intervals in 2 note combinations
-    . Difference in interval between chords. (разрешения)
+    # DONE Intervals in 2 note combinations
+    # DONE Difference in interval between chords. (разрешения)
     . Колина непонятная штука
-    . All instruments play in their range
+    # DONE All instruments play in their range
     """
+    # TODO fix guitar number
     results = {}
     for instr, notes in music.items():
         result = 0.0
@@ -172,8 +140,6 @@ def fitness_function(num_of_octaves, music):
             result += check_tonality(notes)
             result += check_notes_number(instr, notes)
             result += check_chord_intervals(instr, notes)
-            if num_of_octaves >= 2:
-                result += check_octave_pitch(num_of_octaves, instr, notes)
             result += check_intervals(notes)
             results[instr] = result
         # check for bass

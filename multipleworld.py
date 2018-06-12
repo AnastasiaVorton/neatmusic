@@ -26,6 +26,7 @@ class Multipleworld(object):
         self.best_genomes = {}
         self.reporters = ReporterSet()
         self.config = config
+        self.outputs = {0: 12, 1: 24, 25: 36, 33: 24}
         stagnation = config.stagnation_type(config.stagnation_config, self.reporters)
         self.reproduction = config.reproduction_type(config.reproduction_config,
                                                      self.reporters,
@@ -45,6 +46,7 @@ class Multipleworld(object):
             self.generation = 0
             i = 0
             for instrument in instruments:
+                config.set_num_outputs(self.outputs.get(instrument))
                 population = self.reproduction.create_new(config.genome_type,
                                                           config.genome_config,
                                                           config.pop_size)

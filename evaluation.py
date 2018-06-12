@@ -8,13 +8,11 @@ from fitness import fitness_function, music_parser
 
 
 class Evaluator:
-    def __init__(self, octaves: int, dataset: list, workers: int = 5):
+    def __init__(self, dataset: list, workers: int = 5):
         """
-        :param octaves: sounding ranges of generated instruments, in octaves
         :param dataset: list of melodies to measure fitnesses of the genomes upon
         :param workers: number of parallel evaluation workers
         """
-        self.octaves = octaves
         self.dataset = dataset
         self.workers = workers
         self.pool = Pool(workers)
@@ -61,7 +59,7 @@ class Evaluator:
 
         jobs = []
         for melody in self.dataset:
-            jobs.append(self.pool.apply_async(Evaluator.evaluate, (world, melody, self.octaves)))
+            jobs.append(self.pool.apply_async(Evaluator.evaluate, (world, melody)))
         return jobs
 
     @staticmethod
@@ -72,11 +70,11 @@ class Evaluator:
         return out / len(jobs)
 
     @staticmethod
-    def evaluate(world, melody, octaves):
+    def evaluate(world, melody):
         tracks = Evaluator.generate_tracks(world, melody)
         tracks[0] = melody
         cleaned = music_parser(tracks)
-        fitness = fitness_function(octaves, cleaned)
+        fitness = fitness_function(cleaned)
         return sum(fitness.values()) / len(fitness)
 
 
