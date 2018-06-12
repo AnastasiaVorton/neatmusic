@@ -1,6 +1,8 @@
 """Implements the core evolution algorithm."""
 from __future__ import print_function
+from typing import *
 
+from neat import Config
 from neat.reporting import ReporterSet
 from neat.math_util import mean
 from neat.six_util import iteritems, itervalues
@@ -20,13 +22,16 @@ class Multipleworld(object):
         5. Go to 1.
     """
 
-    def __init__(self, config, instruments, initial_state=None):
+    def __init__(self, config: Config, instruments: Dict[int, int], initial_state=None):
+        """
+        :param instruments: map of used instruments to number of outputs
+        """
         self.instruments_map = dict.fromkeys(instruments)
         self.species = {}
         self.best_genomes = {}
         self.reporters = ReporterSet()
         self.config = config
-        self.outputs = {0: 12, 1: 24, 25: 36, 33: 24}
+        self.outputs = instruments
         stagnation = config.stagnation_type(config.stagnation_config, self.reporters)
         self.reproduction = config.reproduction_type(config.reproduction_config,
                                                      self.reporters,

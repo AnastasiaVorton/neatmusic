@@ -1,5 +1,6 @@
 import random
 from multiprocessing import Pool
+from typing import *
 
 from neat import *
 from neat.nn import MLRecurrentNetwork
@@ -50,7 +51,7 @@ class Evaluator:
                 genome_index = shuffled[instrument][world_index]
                 populations[instrument][genome_index][1].fitness = rating
 
-    def run_world_evaluation(self, world):
+    def run_world_evaluation(self, world: Dict[int, MLRecurrentNetwork]):
         """
         Uses the pool to run the world evaluation
         :param world: dictionary of instruments
@@ -63,14 +64,14 @@ class Evaluator:
         return jobs
 
     @staticmethod
-    def combine_world_fitness(jobs):
+    def combine_world_fitness(jobs) -> float:
         out = 0.0
         for j in jobs:
-            out += j.get()
+                out += j.get()
         return out / len(jobs)
 
     @staticmethod
-    def evaluate(world, melody):
+    def evaluate(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]):
         tracks = Evaluator.generate_tracks(world, melody)
         tracks[0] = melody
         cleaned = music_parser(tracks)
@@ -79,7 +80,7 @@ class Evaluator:
 
 
     @staticmethod
-    def generate_tracks(world: dict, melody) -> dict:
+    def generate_tracks(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]) -> dict:
         """
         Runs the world with a melody
         :param world: dictionary of instruments

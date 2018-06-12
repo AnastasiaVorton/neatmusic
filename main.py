@@ -1,19 +1,17 @@
 import os
-import random
 import re
-
-from neat import *
-from neat.nn import MLRecurrentNetwork
 
 from evaluation import *
 from multipleworld import *
 from midi_reader import read_all_dataset
 
+instrument_outputs = {0: 12, 1: 24, 25: 36, 33: 24}
 
-def main():
+
+def main() -> None:
     # Config and data initialization
-    instruments_input = input("Please enter the instruments' ids as a comma-separated list (e.g.: 1, 33): ")
-    instruments = [int(i) for i in re.split('[^0-9]+', instruments_input)]
+
+    instruments = read_settings()
     config = create_config(instruments)
     data = read_all_dataset(1)
     training_set = random.sample(data, 5)
@@ -30,20 +28,27 @@ def main():
     print(winner)
 
 
-def create_config(instruments: list) -> Config:
+def read_settings() -> Dict[int, int]:
+    """
+    Reads the instrument list from the standard input
+    :return: a map with requested instruments and numbers of outputs for each instrument
+    """
+    instruments_input = input("Please enter the instruments' ids as a comma-separated list (e.g.: 1, 33) [1]: ")
+    if instruments_input == '':
+        instruments_input = '1'
+    instruments = {int(i) for i in re.split('[^0-9]+', instruments_input)}
+    return {i: instrument_outputs[i] for i in instruments}
+
+
+def create_config(instruments: Dict[int, int]) -> Config:
     """
     Sets ANN's parameters based on the number of octaves and instruments the user wants to generate
     :return: config with provided parameters
     """
-    drum_outputs = 5
-    outputs = {0: 12, 1: 24, 25: 36, 33: 24}
     conf_path = os.path.join(os.path.dirname(__file__), 'neat-config')
     config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
-    num_inputs = 12  # default is 12 for main melody only
-    num_outputs = 0
-    for instrument in instruments:
-        num_inputs += outputs.get(instrument)
-    config.set_num_inputs_outputs(num_inputs, num_outputs)
+    num_inputs = 12 + sum(instruments.values())
+    config.set_num_inputs(num_inputs)
 
     return config
 
