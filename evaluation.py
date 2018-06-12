@@ -1,5 +1,6 @@
 import random
 from multiprocessing import Pool
+from typing import *
 
 from neat import *
 from neat.nn import MLRecurrentNetwork
@@ -8,13 +9,11 @@ from fitness import fitness_function, music_parser
 
 
 class Evaluator:
-    def __init__(self, octaves: int, dataset: list, workers: int = 5):
+    def __init__(self, dataset: list, workers: int = 5):
         """
-        :param octaves: sounding ranges of generated instruments, in octaves
         :param dataset: list of melodies to measure fitnesses of the genomes upon
         :param workers: number of parallel evaluation workers
         """
-        self.octaves = octaves
         self.dataset = dataset
         self.workers = workers
         self.pool = Pool(workers)
@@ -52,7 +51,7 @@ class Evaluator:
                 genome_index = shuffled[instrument][world_index]
                 populations[instrument][genome_index][1].fitness = rating
 
-    def run_world_evaluation(self, world):
+    def run_world_evaluation(self, world: Dict[int, MLRecurrentNetwork]):
         """
         Uses the pool to run the world evaluation
         :param world: dictionary of instruments
@@ -61,27 +60,27 @@ class Evaluator:
 
         jobs = []
         for melody in self.dataset:
-            jobs.append(self.pool.apply_async(Evaluator.evaluate, (world, melody, self.octaves)))
+            jobs.append(self.pool.apply_async(Evaluator.evaluate, (world, melody)))
         return jobs
 
     @staticmethod
-    def combine_world_fitness(jobs):
+    def combine_world_fitness(jobs) -> float:
         out = 0.0
         for j in jobs:
-            out += j.get()
+                out += j.get()
         return out / len(jobs)
 
     @staticmethod
-    def evaluate(world, melody, octaves):
+    def evaluate(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]):
         tracks = Evaluator.generate_tracks(world, melody)
         tracks[0] = melody
         cleaned = music_parser(tracks)
-        fitness = fitness_function(octaves, cleaned)
+        fitness = fitness_function(cleaned)
         return sum(fitness.values()) / len(fitness)
 
 
     @staticmethod
-    def generate_tracks(world: dict, melody) -> dict:
+    def generate_tracks(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]) -> dict:
         """
         Runs the world with a melody
         :param world: dictionary of instruments

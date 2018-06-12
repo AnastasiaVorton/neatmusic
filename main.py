@@ -1,22 +1,19 @@
 import os
-import random
 import re
-
-from neat import *
-from neat.nn import MLRecurrentNetwork
 
 from evaluation import *
 from multipleworld import *
 from midi_reader import read_all_dataset
 
+instrument_outputs = {0: 12, 1: 24, 25: 36, 33: 24}
 
-def main():
+
+def main() -> None:
     # Config and data initialization
-    num_of_octaves = int(input("Please enter the number of octaves you want your music to be generated: "))
-    instruments_input = input("Please enter the instruments' ids as a comma-separated list (e.g.: 1, 33): ")
-    instruments = [int(i) for i in re.split('[^0-9]+', instruments_input)]
-    config = create_config(num_of_octaves, len(instruments))
-    data = read_all_dataset(num_of_octaves)
+
+    instruments = read_settings()
+    config = create_config(instruments)
+    data = read_all_dataset(1)
     training_set = random.sample(data, 5)
 
     # Multiple world initialization
@@ -26,24 +23,32 @@ def main():
     p.add_reporter(Checkpointer(generation_interval=10, filename_prefix='checkpoint-'))
 
     # Running and result handling
-    evaluator = Evaluator(num_of_octaves, training_set)
+    evaluator = Evaluator(training_set)
     winner = p.run(evaluator.evaluate_genomes, 100)
     print(winner)
 
 
-def create_config(num_of_octaves: int, num_of_instruments: int) -> Config:
+def read_settings() -> Dict[int, int]:
+    """
+    Reads the instrument list from the standard input
+    :return: a map with requested instruments and numbers of outputs for each instrument
+    """
+    instruments_input = input("Please enter the instruments' ids as a comma-separated list (e.g.: 1, 33) [1]: ")
+    if instruments_input == '':
+        instruments_input = '1'
+    instruments = {int(i) for i in re.split('[^0-9]+', instruments_input)}
+    return {i: instrument_outputs[i] for i in instruments}
+
+
+def create_config(instruments: Dict[int, int]) -> Config:
     """
     Sets ANN's parameters based on the number of octaves and instruments the user wants to generate
-    :param num_of_octaves:
-    :param num_of_instruments:
     :return: config with provided parameters
     """
     conf_path = os.path.join(os.path.dirname(__file__), 'neat-config')
     config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
-
-    num_inputs = num_of_octaves * 12 * (num_of_instruments + 1)
-    num_outputs = num_of_octaves * 12
-    config.set_num_inputs_outputs(num_inputs, num_outputs)
+    num_inputs = 12 + sum(instruments.values())
+    config.set_num_inputs(num_inputs)
 
     return config
 
