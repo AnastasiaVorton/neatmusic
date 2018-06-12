@@ -2,6 +2,43 @@
     NEXT CODE IS IMPLEMENTATION OF FITNESS FUNCTION
 """
 
+consonants = [0, 3, 4, 5, 7, 8, 9]
+
+
+def two_tracks_consonance_fitness(track1, track2):
+    """
+    Calculates fitness of two tracks together regarding how consonant their simultaneous chords are
+    :param track1:
+    :param track2:
+    :return: normalised fitness value in range 0...1
+    """
+    chords_fitness = 0
+    simultaneous_chords = 0
+    for chord1 in track1:
+        for chord2 in track2:
+            if chord1[2] < chord2[2]:
+                break
+            if chord1[2] == chord2[2]:
+                simultaneous_chords = simultaneous_chords + 1
+                chords_fitness = chords_fitness + two_chords_consonance_fitness(chord1, chord2)
+    return chords_fitness/simultaneous_chords
+
+
+def two_chords_consonance_fitness(chord1, chord2):
+    """
+    Calculates fitness of two chords together regarding how consonant they are
+    :param chord1:
+    :param chord2:
+    :return:
+    """
+    good_intervals = 0
+    for pitch1 in chord1[0]:
+        for pitch2 in chord2[0]:
+            diff = abs(pitch1 % 12 - pitch2 % 12)
+            if diff in consonants:
+                good_intervals = good_intervals + 1
+    return good_intervals/(len(chord1[0])*len(chord2[0]))
+
 
 def check_tonality(separate_track):
     """
@@ -232,6 +269,8 @@ def check_timestamp_fitness(main, second):
         return 1.0
     else:
         return perc_good
+
+
 
 
 def fitness_function(num_of_octaves, music):

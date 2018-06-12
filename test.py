@@ -5,7 +5,8 @@ for i in range(0, 36):
     notes.append(i)
 
 durations = [1 / 32, 1 / 16, 1 / 8, 1 / 4, 1 / 2, 1]
-start_ticks = [64, 32, 16, 8, 4, 2, 1, 0]
+consonants = [0, 3, 4, 5, 7, 8, 9]
+start_ticks = [64, 32, 16, 8, 4, 2, 1]
 
 
 def write_track(type):
@@ -107,6 +108,31 @@ def dissonance_check(first, second):
         return True
 
 
+def pair_dissonance_check(track1, track2):
+    chords_fitness = 0
+    simultaneous_chords = 0
+    for chord1 in track1:
+        for chord2 in track2:
+            if chord1[2] < chord2[2]:
+                break
+            if chord1[2] == chord2[2]:
+                simultaneous_chords = simultaneous_chords + 1
+                chords_fitness = chords_fitness + two_chords_dissonance_check(chord1, chord2)
+    return chords_fitness/simultaneous_chords
+
+
+def two_chords_dissonance_check(chord1, chord2):
+    good_intervals = 0
+    for pitch1 in chord1[0]:
+        for pitch2 in chord2[0]:
+            diff = abs(pitch1 % 12 - pitch2 % 12)
+            if diff in consonants:
+                good_intervals = good_intervals + 1
+    return good_intervals/(len(chord1[0])*len(chord2[0]))
+
+
+
+
 def check_intervals(separate_track):
     num_good = 0
     total_intervals = 0
@@ -180,9 +206,15 @@ def fitness_function(num_of_octaves, music):
 
 chords1 = write_track(1)
 chords2 = write_track(2)
-music = {26: chords1}
+
+print(pair_dissonance_check(chords1, chords2))
+
+# music = {26: chords1}
 # print(check_intervals(chords1))
-print(check_timestamp_fitness(chords1, chords2))
+# print(dissonance_check(chords1[0], chords2[0]))
 # oktaves = 3
+
+
+
 
 # print(fitness_function(oktaves, music))
