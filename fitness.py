@@ -4,7 +4,7 @@ from typing import *
 # C major notes
 good_notes = [0, 2, 4, 5, 7, 9, 11]
 piano = 1
-guitar_acoustic = 26
+guitar_acoustic = 25
 guitar_bass = 33
 consonants = [0, 3, 4, 5, 7, 8, 9]
 chord_length_threshold = 1.0
@@ -57,7 +57,7 @@ def check_tonality(separate_track):
         for note in chord[0]:
             notes.append(note % 12)
     for note in notes:
-        if note in good_notes:
+        if is_in_tonality(note):
             num_good += 1
     # ratio of good notes to total number of notes
     return num_good / max(len(notes), 1)
@@ -188,7 +188,7 @@ def chord_length(track) -> float:
 
 def fitness_function(music):
     """
-    instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
+    instruments: 33 - bass, 1 - piano, 25 - acoustic guitar
     # DONE - Tonality: Check all notes if they belong to tonality or not
     # DONE - Number of simultaneously played notes
     # DONE - Intervals in chords:
@@ -197,12 +197,11 @@ def fitness_function(music):
     . Колина непонятная штука
     # DONE All instruments play in their range
     """
-    # TODO fix guitar number
     results = {}
     for instr, notes in music.items():
         result = 0.0
         # check for piano and rhythm guitar
-        if instr == 1 or instr == 26:
+        if instr == 1 or instr == 25:
             result += check_tonality(notes)
             result -= chord_length(notes) * 2
             #result += check_notes_number(instr, notes)
