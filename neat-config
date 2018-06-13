@@ -29,22 +29,22 @@ compatibility_disjoint_coefficient = 1.0
 compatibility_weight_coefficient   = 0.5
 
 # connection add/remove rates
-conn_add_prob           = 0.5
-conn_delete_prob        = 0.5
+conn_add_prob           = 0.7
+conn_delete_prob        = 0.7
 
 # connection enable options
 enabled_default         = True
-enabled_mutate_rate     = 0.010
+enabled_mutate_rate     = 0.0
 
 feed_forward            = False
-initial_connection      = partial_direct 0.5
+initial_connection      = partial_direct 0.1
 
 # node add/remove rates
-node_add_prob           = 0.2
-node_delete_prob        = 0.2
+node_add_prob           = 0.5
+node_delete_prob        = 0.5
 
 # network parameters
-num_hidden              = 2
+num_hidden              = 15
 num_inputs              = 1
 num_outputs             = 1
 nw_type                 = mlrnn
@@ -68,13 +68,15 @@ weight_mutate_rate      = 0.8
 weight_replace_rate     = 0.1
 
 [DefaultSpeciesSet]
-compatibility_threshold = 3.0
+# genomes with compatibility less that this are in the same species
+compatibility_threshold = 5.0
 
 [DefaultStagnation]
 species_fitness_func = max
 max_stagnation       = 20
-species_elitism      = 2
+species_elitism      = 10
 
 [DefaultReproduction]
-elitism            = 2
-survival_threshold = 0.2
+elitism            = 5
+survival_threshold = 0.5
+min_species_size = 5
