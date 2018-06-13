@@ -1,4 +1,5 @@
 import math
+from typing import *
 
 # C major notes
 good_notes = [0, 2, 4, 5, 7, 9, 11]
@@ -6,6 +7,7 @@ piano = 1
 guitar_acoustic = 26
 guitar_bass = 33
 consonants = [0, 3, 4, 5, 7, 8, 9]
+chord_length_threshold = 1.0
 
 
 def two_tracks_consonance_fitness(track1, track2):
@@ -174,6 +176,16 @@ def check_timestamp_fitness(main, second, percents):
         return perc_good
 
 
+def chord_length(track) -> float:
+    sum_lengths = 0.0
+    bad_lengths = 0.0
+    for _, length, _ in track:
+        sum_lengths += length
+        if length > chord_length_threshold:
+            bad_lengths += length
+    return bad_lengths / max(sum_lengths, 1.0)
+
+
 def fitness_function(music):
     """
     instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
@@ -192,23 +204,25 @@ def fitness_function(music):
         # check for piano and rhythm guitar
         if instr == 1 or instr == 26:
             result += check_tonality(notes)
-            result += check_notes_number(instr, notes)
-            result += check_chord_intervals(instr, notes)
-            result += check_intervals(notes)
+            result -= chord_length(notes) * 2
+            #result += check_notes_number(instr, notes)
+            #result += check_chord_intervals(instr, notes)
+            #result += check_intervals(notes)
             results[instr] = result
         # check for bass
         elif instr == 33:
             result += check_tonality(notes)
-            result += check_notes_number(instr, notes)
+            result -= chord_length(notes) * 2
+            #result += check_notes_number(instr, notes)
             results[instr] = result
     return results
 
 
-def music_parser(music):
+def music_parser(music) -> Dict[int, List[Tuple[List[int], float, int]]]:
     """
     Parse list by the beginning.
     :param music: given music
-    :return: parsed list of notes
+    :return: list of chords, chord is defined as tuple of list of pitches, duration, and start offset
     """
     # Rectify input music
     for part in music.keys():
