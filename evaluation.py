@@ -7,6 +7,8 @@ from neat.nn import MLRecurrentNetwork
 
 from fitness import fitness_function, music_parser
 
+ticks_delay = 128
+
 
 class Evaluator:
     def __init__(self, dataset: list, workers: int = 5):
@@ -58,16 +60,12 @@ class Evaluator:
         :return: list of jobs for each track in the dataset
         """
 
-        jobs = []
-        for melody in self.dataset:
-            jobs.append(self.pool.apply_async(Evaluator.evaluate, (world, melody)))
+        jobs = [self.pool.apply_async(Evaluator.evaluate, (world, random.choice(self.dataset)))]
         return jobs
 
     @staticmethod
     def combine_world_fitness(jobs) -> float:
-        out = 0.0
-        for j in jobs:
-                out += j.get()
+        out = sum([i.get() for i in jobs])
         return out / len(jobs)
 
     @staticmethod
@@ -78,9 +76,8 @@ class Evaluator:
         fitness = fitness_function(cleaned)
         return sum(fitness.values()) / len(fitness)
 
-
     @staticmethod
-    def generate_tracks(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]) -> dict:
+    def generate_tracks(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]) -> Dict[int, List[List[float]]]:
         """
         Runs the world with a melody
         :param world: dictionary of instruments
@@ -89,16 +86,25 @@ class Evaluator:
         """
         tracks = {x: [] for x in world.keys()}
         # First tick sends zeroes for inputs at generated instruments
-        inputs = melody[0] + [0] * sum([len(x.output_nodes) for x in world.values()])
+        inputs = [0.0] + melody[0] + [0.0] * sum([len(x.output_nodes) for x in world.values()])
         for instrument, list in tracks.items():
             output = [float(round(i)) for i in world[instrument].activate(inputs)]
             list.append(output)
         # Following ticks use previous outputs
         for tick, melody_inputs in enumerate(melody[1:]):
-            inputs = melody_inputs.copy()
+            inputs = [0.0] + melody_inputs.copy()
             for i in tracks.values():
                 inputs.extend(i[tick])
             for instrument, list in tracks.items():
                 output = [float(round(i)) for i in world[instrument].activate(inputs)]
                 list.append(output)
+        # Add last ticks_delay NN activations
+        for _ in range(ticks_delay):
+            inputs = [1.0] + [0.0] * (len(melody[0]) + sum([len(x.output_nodes) for x in world.values()]))
+            for instrument, list in tracks.items():
+                output = [float(round(i)) for i in world[instrument].activate(inputs)]
+                list.append(output)
+        # Remove first ticks_delay NN activations
+        for instrument in tracks.keys():
+            tracks[instrument] = tracks[instrument][ticks_delay:]
         return tracks

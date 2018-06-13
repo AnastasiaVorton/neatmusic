@@ -6,14 +6,14 @@ from multipleworld import *
 from midi_reader import read_all_dataset
 
 instrument_outputs = {0: 12, 1: 24, 25: 36, 33: 24}
+input_melody_octaves = 1
 
 
 def main() -> None:
     # Config and data initialization
-
     instruments = read_settings()
     config = create_config(instruments)
-    data = read_all_dataset(1)
+    data = read_all_dataset(input_melody_octaves)
     training_set = random.sample(data, 5)
 
     # Multiple world initialization
@@ -25,7 +25,7 @@ def main() -> None:
 
     # Running and result handling
     evaluator = Evaluator(training_set)
-    winner = p.run(evaluator.evaluate_genomes, 100)
+    winner = p.run(evaluator.evaluate_genomes)
     print(winner)
 
 
@@ -48,9 +48,8 @@ def create_config(instruments: Dict[int, int]) -> Config:
     """
     conf_path = os.path.join(os.path.dirname(__file__), 'neat-config')
     config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
-    num_inputs = 12 + sum(instruments.values())
+    num_inputs = input_melody_octaves * 12 + sum(instruments.values()) + 1
     config.set_num_inputs(num_inputs)
-
     return config
 
 

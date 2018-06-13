@@ -1,10 +1,48 @@
 import math
+from typing import *
 
 # C major notes
 good_notes = [0, 2, 4, 5, 7, 9, 11]
 piano = 1
-guitar_acoustic = 26
+guitar_acoustic = 25
 guitar_bass = 33
+consonants = [0, 3, 4, 5, 7, 8, 9]
+chord_length_threshold = 1.0
+
+
+def two_tracks_consonance_fitness(track1, track2):
+    """
+    Calculates fitness of two tracks together regarding how consonant their simultaneous chords are
+    :param track1:
+    :param track2:
+    :return: normalised fitness value in range 0...1
+    """
+    chords_fitness = 0
+    simultaneous_chords = 0
+    for chord1 in track1:
+        for chord2 in track2:
+            if chord1[2] < chord2[2]:
+                break
+            if chord1[2] == chord2[2]:
+                simultaneous_chords = simultaneous_chords + 1
+                chords_fitness = chords_fitness + two_chords_consonance_fitness(chord1, chord2)
+    return chords_fitness/simultaneous_chords
+
+
+def two_chords_consonance_fitness(chord1, chord2):
+    """
+    Calculates fitness of two chords together regarding how consonant they are
+    :param chord1:
+    :param chord2:
+    :return:
+    """
+    good_intervals = 0
+    for pitch1 in chord1[0]:
+        for pitch2 in chord2[0]:
+            diff = abs(pitch1 % 12 - pitch2 % 12)
+            if diff in consonants:
+                good_intervals = good_intervals + 1
+    return good_intervals/(len(chord1[0])*len(chord2[0]))
 
 
 def check_tonality(separate_track):
@@ -19,7 +57,7 @@ def check_tonality(separate_track):
         for note in chord[0]:
             notes.append(note % 12)
     for note in notes:
-        if note in good_notes:
+        if is_in_tonality(note):
             num_good += 1
     # ratio of good notes to total number of notes
     return num_good / max(len(notes), 1)
@@ -88,10 +126,11 @@ def dissonance_check(first, second):
             return True
         if first[0][1] % 12 == 5 and (second[0][1] % 12 == 4 or second[0][1] % 12 == 7):
             return True
-        if first[0][1] % 12 == 11 and second[0][1] % 12 == 0 :
+        if first[0][1] % 12 == 11 and second[0][1] % 12 == 0:
             return True
     # first is unstable
-    if first[0][0] % 12 == 5 and first[0][1] % 12 == 7 and second[0][1] % 12 == 7 and (second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
+    if first[0][0] % 12 == 5 and first[0][1] % 12 == 7 and second[0][1] % 12 == 7 and (
+                second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
         return True
     return False
 
@@ -113,16 +152,43 @@ def check_intervals(separate_track):
                     num_good += 1
                 # checks for dissonance
                 if index < len(separate_track) - 1:
-                    next_chord = separate_track[index+1]
+                    next_chord = separate_track[index + 1]
                     if len(next_chord[0]) == 2 and dissonance_check(chord, next_chord):
                         num_good += 1
     # ratio of good intervals to total number of intervals
     return num_good / max(total_intervals, 1)
 
 
+def check_timestamp_fitness(main, second, percents):
+    #  1 если больше 50% совпадают с аккордом, % есди беньше 50
+    # checks if a note in main melody and a chord in an instrument part start simultaneously
+    good = 0
+    for note in main:
+        for chord in second:
+            if chord[2] == note[2]:
+                good += 1
+                print(note, chord)
+    print('good: ', good, ', total: ', len(second))
+    perc_good = good / len(second)
+    if perc_good >= percents:
+        return 1.0
+    else:
+        return perc_good
+
+
+def chord_length(track) -> float:
+    sum_lengths = 0.0
+    bad_lengths = 0.0
+    for _, length, _ in track:
+        sum_lengths += length
+        if length > chord_length_threshold:
+            bad_lengths += length
+    return bad_lengths / max(sum_lengths, 1.0)
+
+
 def fitness_function(music):
     """
-    instruments: 33 - bass, 1 - piano, 26 - acoustic guitar
+    instruments: 33 - bass, 1 - piano, 25 - acoustic guitar
     # DONE - Tonality: Check all notes if they belong to tonality or not
     # DONE - Number of simultaneously played notes
     # DONE - Intervals in chords:
@@ -131,30 +197,34 @@ def fitness_function(music):
     . Колина непонятная штука
     # DONE All instruments play in their range
     """
-    # TODO fix guitar number
     results = {}
     for instr, notes in music.items():
         result = 0.0
         # check for piano and rhythm guitar
-        if instr == 1 or instr == 26:
+        if instr == 1 or instr == 25:
             result += check_tonality(notes)
-            result += check_notes_number(instr, notes)
-            result += check_chord_intervals(instr, notes)
-            result += check_intervals(notes)
+            result -= chord_length(notes) * 2
+            #result += check_notes_number(instr, notes)
+            #result += check_chord_intervals(instr, notes)
+            #result += check_intervals(notes)
             results[instr] = result
         # check for bass
         elif instr == 33:
             result += check_tonality(notes)
-            result += check_notes_number(instr, notes)
+            result -= chord_length(notes) * 2
+            #result += check_notes_number(instr, notes)
             results[instr] = result
+    main = music.get(0)
+    left_hand = music.get(piano)
+    results[128] = check_timestamp_fitness(main, left_hand, 0.5)
     return results
 
 
-def music_parser(music):
+def music_parser(music) -> Dict[int, List[Tuple[List[int], float, int]]]:
     """
     Parse list by the beginning.
     :param music: given music
-    :return: parsed list of notes
+    :return: list of chords, chord is defined as tuple of list of pitches, duration, and start offset
     """
     # Rectify input music
     for part in music.keys():
