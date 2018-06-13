@@ -24,7 +24,7 @@ def main() -> None:
 
     # Running and result handling
     evaluator = Evaluator(training_set)
-    winner = p.run(evaluator.evaluate_genomes, 100)
+    winner = p.run(evaluator.evaluate_genomes)
     print(winner)
 
 
