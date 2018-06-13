@@ -214,6 +214,9 @@ def fitness_function(music):
             result -= chord_length(notes) * 2
             #result += check_notes_number(instr, notes)
             results[instr] = result
+    main = music.get(0)
+    left_hand = music.get(piano)
+    results[128] = check_timestamp_fitness(main, left_hand, 0.5)
     return results
 
 
