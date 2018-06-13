@@ -14,9 +14,9 @@ def generate_composition(checkpoint_file_name, midi_file_name, new_midi_file_nam
     :param new_midi_file_name:
     :return:
     """
-    config, populations = Checkpointer.retrieve_populations_deprecated(checkpoint_file_name)
-    world = create_fittest_world({1: populations})
-    nns = create_nns_from_world(world, config)
+    configs, populations = Checkpointer.retrieve_populations(checkpoint_file_name)
+    world = create_fittest_world(populations)
+    nns = create_nns_from_world(world, configs)
     initial_melody = read_file(midi_file_name)
     tracks = Evaluator.generate_tracks(nns, initial_melody)
     cleaned = music_parser(tracks)
@@ -42,7 +42,7 @@ def create_fittest_world(populations):
     return world
 
 
-def create_nns_from_world(world, config):
-    nns = {instrument: MLRecurrentNetwork.create(individual, config)
+def create_nns_from_world(world, configs):
+    nns = {instrument: MLRecurrentNetwork.create(individual, configs[instrument])
            for instrument, individual in world.items()}
     return nns

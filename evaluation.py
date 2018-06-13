@@ -24,11 +24,11 @@ class Evaluator:
         self.pool.close()
         self.pool.join()
 
-    def evaluate_genomes(self, populations: dict, config: Config):
+    def evaluate_genomes(self, populations: dict, configs):
         """
         Evaluates the genomes by combining them into worlds and evaluating the worlds
         :param populations: dictionary of populations for each instrument
-        :param config: NEAT configuration object
+        :param configs: NEAT configuration object
         """
         instruments = list(populations.keys())
         pop_size = len(populations[instruments[0]])
@@ -36,7 +36,7 @@ class Evaluator:
             assert len(pop) == pop_size
 
         # Create a neural network from each genome
-        nns = {name: [MLRecurrentNetwork.create(genome, config) for _, genome in genomes]
+        nns = {name: [MLRecurrentNetwork.create(genome, configs[name]) for _, genome in genomes]
                for name, genomes in populations.items()}
 
         # Combine a neural network with other neural networks

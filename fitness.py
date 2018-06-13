@@ -167,8 +167,7 @@ def check_timestamp_fitness(main, second, percents):
         for chord in second:
             if chord[2] == note[2]:
                 good += 1
-                print(note, chord)
-    print('good: ', good, ', total: ', len(second))
+                # print(note, chord)
     perc_good = good / len(second)
     if perc_good >= percents:
         return 1.0
