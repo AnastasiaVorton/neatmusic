@@ -177,6 +177,7 @@ def check_timestamp_fitness(main, second, percents):
 
 
 def chord_length(track) -> float:
+
     sum_lengths = 0.0
     bad_lengths = 0.0
     for _, length, _ in track:
@@ -197,6 +198,7 @@ def fitness_function(music):
     . Колина непонятная штука
     # DONE All instruments play in their range
     """
+    # TODO correct datatype
     results = {}
     for instr, notes in music.items():
         result = 0.0
