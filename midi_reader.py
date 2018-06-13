@@ -53,8 +53,10 @@ def read_file(file_path, number_of_octaves=1, ticks_per_beat=16):
 
             ticks_in_note = msg.time / ticks_per_atomic_duration
             if ticks_in_note.is_integer():
-                for _ in range(int(ticks_in_note)):
+                for _ in range(int(ticks_in_note) - 1):
                     output.append(nn_input)
+                if ticks_in_note > 0:
+                    output.append([0.0 for _ in range(12 * number_of_octaves)])
     return output
 
 

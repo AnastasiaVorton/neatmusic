@@ -12,7 +12,7 @@ input_melody_octaves = 1
 
 def main() -> None:
     # Config and data initialization
-    generate_composition('checkpoint-223', 'jinglebells2.mid', 'result.mid')
+    generate_composition('checkpoint-287', 'jinglebells2.mid', 'result.mid')
 
     instruments = read_settings()
     configs = create_config(instruments)
@@ -20,7 +20,7 @@ def main() -> None:
     training_set = random.sample(data, 5)
 
     # Multiple world initialization
-    p = Checkpointer.restore_checkpoint('checkpoint-223')
+    p = Checkpointer.restore_checkpoint('checkpoint-287')
     # p = Multipleworld(configs, instruments)
     p.add_reporter(StdOutReporter(True))
     p.add_reporter(StatisticsReporter())
