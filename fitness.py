@@ -222,45 +222,40 @@ def fitness_function(music):
     return results
 
 
-def music_parser(music) -> Dict[int, List[Tuple[List[int], float, int]]]:
+def music_parser(part) -> List[Tuple[List[int], float, int]]:
     """
     Parse list by the beginning.
-    :param music: given music
+    :param part: given music
     :return: list of chords, chord is defined as tuple of list of pitches, duration, and start offset
     """
     # Rectify input music
-    for part in music.keys():
-        for tick in range(len(music[part])):
-            if tick % 2 == 0:
-                continue
-            for i in range(len(music[part][tick])):
-                if music[part][tick - 1][i] == 1.0:
-                    music[part][tick][i] = 1.0
-                else:
-                    music[part][tick][i] = 0.0
+    for tick in range(len(part)):
+        if tick % 2 == 0:
+            continue
+        for i in range(len(part[tick])):
+            if part[tick - 1][i] == 1.0:
+                part[tick][i] = 1.0
+            else:
+                part[tick][i] = 0.0
     # Parse music
-    parsed_music = {}
-    for part in music.keys():
-        cnt = 1
-        chord = []
-        parsed_part = []
-        note_start = 0
-        for tick in range(len(music[part])):
-            end_of_chord = False
-            if tick != len(music[part]) - 1:
-                for i in range(len(music[part][tick])):
-                    if music[part][tick][i] != music[part][tick + 1][i]:
-                        end_of_chord = True
-                        break
-            if end_of_chord or tick == len(music[part]) - 1:
-                for i in range(len(music[part][tick])):
-                    if music[part][tick][i] == 1.0:
-                        chord.append(i % 12)
-                parsed_part.append((chord.copy(), float(cnt) / 64, note_start))
-                note_start = tick + 1
-                chord.clear()
-                cnt = 0
-            cnt += 1
-        if len(parsed_part) != 0:
-            parsed_music[part] = parsed_part.copy()
-    return parsed_music
+    cnt = 1
+    chord = []
+    parsed_part = []
+    note_start = 0
+    for tick in range(len(part)):
+        end_of_chord = False
+        if tick != len(part) - 1:
+            for i in range(len(part[tick])):
+                if part[tick][i] != part[tick + 1][i]:
+                    end_of_chord = True
+                    break
+        if end_of_chord or tick == len(part) - 1:
+            for i in range(len(part[tick])):
+                if part[tick][i] == 1.0:
+                    chord.append(i % 12)
+            parsed_part.append((chord.copy(), float(cnt) / 64, note_start))
+            note_start = tick + 1
+            chord.clear()
+            cnt = 0
+        cnt += 1
+    return parsed_part
