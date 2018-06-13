@@ -1,6 +1,7 @@
 import os
 import re
 
+from composition_generator import generate_composition
 from evaluation import *
 from multipleworld import *
 from midi_reader import read_all_dataset
@@ -11,6 +12,8 @@ input_melody_octaves = 1
 
 def main() -> None:
     # Config and data initialization
+    # generate_composition('checkpoint-1539', 'jinglebells2.mid', 'result')
+
     instruments = read_settings()
     config = create_config(instruments)
     data = read_all_dataset(input_melody_octaves)
