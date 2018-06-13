@@ -1,6 +1,5 @@
 """Implements the core evolution algorithm."""
 from __future__ import print_function
-from typing import *
 
 from neat import Config
 from neat.reporting import ReporterSet
@@ -22,11 +21,11 @@ class Multipleworld(object):
         5. Go to 1.
     """
 
-    def __init__(self, config: Config, instruments: Dict[int, int], initial_state=None):
+    def __init__(self, config: Config, instruments, initial_state=None):
         """
         :param instruments: map of used instruments to number of outputs
         """
-        self.instruments_map = dict.fromkeys(instruments)
+        self.instruments_map = {}
         self.species = {}
         self.best_genomes = {}
         self.reporters = ReporterSet()
@@ -60,7 +59,8 @@ class Multipleworld(object):
                 self.species[instrument].speciate(config, self.instruments_map[instrument], self.generation)
                 i = i + 1
         else:
-            self.population, self.species, self.generation = initial_state
+            self.instruments_map, self.species, self.generation = initial_state
+            self.generation = self.generation + 1
 
     def add_reporter(self, reporter):
         self.reporters.add(reporter)
@@ -139,7 +139,8 @@ class Multipleworld(object):
 
                 # Divide the new population into species.
                 self.species[instrument].speciate(self.config, self.instruments_map[instrument], self.generation)
-                self.reporters.end_generation(self.config, self.instruments_map[instrument], self.species[instrument])
+
+            self.reporters.end_generation(self.config, self.instruments_map, self.species)
 
             self.generation += 1
 

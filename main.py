@@ -17,10 +17,11 @@ def main() -> None:
     training_set = random.sample(data, 5)
 
     # Multiple world initialization
+    # p = Checkpointer.restore_checkpoint('checkpoint-4')
     p = Multipleworld(config, instruments)
     p.add_reporter(StdOutReporter(True))
     p.add_reporter(StatisticsReporter())
-    p.add_reporter(Checkpointer(generation_interval=10, filename_prefix='checkpoint-'))
+    p.add_reporter(Checkpointer(instruments=instruments, generation_interval=1, filename_prefix='checkpoint-'))
 
     # Running and result handling
     evaluator = Evaluator(training_set)

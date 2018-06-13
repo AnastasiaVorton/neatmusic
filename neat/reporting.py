@@ -101,24 +101,25 @@ class StdOutReporter(BaseReporter):
         print('\n ****** Running generation {0} ****** \n'.format(generation))
         self.generation_start_time = time.time()
 
-    def end_generation(self, config, population, species_set):
-        ng = len(population)
-        ns = len(species_set.species)
+    def end_generation(self, config, populations, species_set):
+        ng = len(list(populations.values())[0])
+        ns = len(list(species_set.values())[0].species)
         if self.show_species_detail:
             print('Population of {0:d} members in {1:d} species:'.format(ng, ns))
-            sids = list(iterkeys(species_set.species))
-            sids.sort()
-            print("   ID   age  size  fitness  adj fit  stag")
-            print("  ====  ===  ====  =======  =======  ====")
-            for sid in sids:
-                s = species_set.species[sid]
-                a = self.generation - s.created
-                n = len(s.members)
-                f = "--" if s.fitness is None else "{:.1f}".format(s.fitness)
-                af = "--" if s.adjusted_fitness is None else "{:.3f}".format(s.adjusted_fitness)
-                st = self.generation - s.last_improved
-                print(
-                    "  {: >4}  {: >3}  {: >4}  {: >7}  {: >7}  {: >4}".format(sid, a, n, f, af, st))
+            for instr, spec in species_set.items():
+                sids = list(iterkeys(spec.species))
+                sids.sort()
+                print("   ID   age  size  fitness  adj fit  stag")
+                print("  ====  ===  ====  =======  =======  ====")
+                for sid in sids:
+                    s = spec.species[sid]
+                    a = self.generation - s.created
+                    n = len(s.members)
+                    f = "--" if s.fitness is None else "{:.1f}".format(s.fitness)
+                    af = "--" if s.adjusted_fitness is None else "{:.3f}".format(s.adjusted_fitness)
+                    st = self.generation - s.last_improved
+                    print(
+                        "  {: >4}  {: >3}  {: >4}  {: >7}  {: >7}  {: >4}".format(sid, a, n, f, af, st))
         else:
             print('Population of {0:d} members in {1:d} species'.format(ng, ns))
 
