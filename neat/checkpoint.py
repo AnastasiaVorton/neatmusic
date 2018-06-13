@@ -5,6 +5,8 @@ import gzip
 import random
 import time
 
+from multipleworld import Multipleworld
+
 try:
     import cPickle as pickle # pylint: disable=import-error
 except ImportError:
@@ -19,7 +21,7 @@ class Checkpointer(BaseReporter):
     A reporter class that performs checkpointing using `pickle`
     to save and restore populations (and other aspects of the simulation state).
     """
-    def __init__(self, generation_interval=100, time_interval_seconds=300,
+    def __init__(self, instruments, generation_interval=100, time_interval_seconds=300,
                  filename_prefix='neat-checkpoint-'):
         """
         Saves the current state (at the end of a generation) every ``generation_interval`` generations or
@@ -31,6 +33,7 @@ class Checkpointer(BaseReporter):
         :type time_interval_seconds: float or None
         :param str filename_prefix: Prefix for the filename (the end will be the generation number)
         """
+        self.instruments = instruments
         self.generation_interval = generation_interval
         self.time_interval_seconds = time_interval_seconds
         self.filename_prefix = filename_prefix
@@ -66,13 +69,13 @@ class Checkpointer(BaseReporter):
         print("Saving checkpoint to {0}".format(filename))
 
         with gzip.open(filename, 'w', compresslevel=5) as f:
-            data = (generation, config, population, species_set, random.getstate())
+            data = (self.instruments, generation, config, population, species_set, random.getstate())
             pickle.dump(data, f, protocol=pickle.HIGHEST_PROTOCOL)
 
     @staticmethod
     def restore_checkpoint(filename):
         """Resumes the simulation from a previous saved point."""
         with gzip.open(filename) as f:
-            generation, config, population, species_set, rndstate = pickle.load(f)
+            instruments, generation, config, population, species_set, rndstate = pickle.load(f)
             random.setstate(rndstate)
-            return Population(config, (population, species_set, generation))
+            return Multipleworld(config, instruments, (population, species_set, generation))

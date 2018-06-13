@@ -1,6 +1,7 @@
 """Implements the core evolution algorithm."""
 from __future__ import print_function
 
+from neat import Config
 from neat.reporting import ReporterSet
 from neat.math_util import mean
 from neat.six_util import iteritems, itervalues
@@ -20,12 +21,16 @@ class Multipleworld(object):
         5. Go to 1.
     """
 
-    def __init__(self, config, instruments, initial_state=None):
-        self.instruments_map = dict.fromkeys(instruments)
+    def __init__(self, config: Config, instruments, initial_state=None):
+        """
+        :param instruments: map of used instruments to number of outputs
+        """
+        self.instruments_map = {}
         self.species = {}
         self.best_genomes = {}
         self.reporters = ReporterSet()
         self.config = config
+        self.outputs = instruments
         stagnation = config.stagnation_type(config.stagnation_config, self.reporters)
         self.reproduction = config.reproduction_type(config.reproduction_config,
                                                      self.reporters,
@@ -45,6 +50,7 @@ class Multipleworld(object):
             self.generation = 0
             i = 0
             for instrument in instruments:
+                config.set_num_outputs(self.outputs.get(instrument))
                 population = self.reproduction.create_new(config.genome_type,
                                                           config.genome_config,
                                                           config.pop_size)
@@ -53,7 +59,8 @@ class Multipleworld(object):
                 self.species[instrument].speciate(config, self.instruments_map[instrument], self.generation)
                 i = i + 1
         else:
-            self.population, self.species, self.generation = initial_state
+            self.instruments_map, self.species, self.generation = initial_state
+            self.generation = self.generation + 1
 
     def add_reporter(self, reporter):
         self.reporters.add(reporter)
@@ -133,7 +140,7 @@ class Multipleworld(object):
                 # Divide the new population into species.
                 self.species[instrument].speciate(self.config, self.instruments_map[instrument], self.generation)
 
-            # self.reporters.end_generation(self.config, self.population, self.species)
+            self.reporters.end_generation(self.config, self.instruments_map, self.species)
 
             self.generation += 1
 
