@@ -76,6 +76,20 @@ class Checkpointer(BaseReporter):
     def restore_checkpoint(filename):
         """Resumes the simulation from a previous saved point."""
         with gzip.open(filename) as f:
-            instruments, generation, config, population, species_set, rndstate = pickle.load(f)
+            instruments, generation, config, populations, species_set, rndstate = pickle.load(f)
             random.setstate(rndstate)
-            return Multipleworld(config, instruments, (population, species_set, generation))
+            return Multipleworld(config, instruments, (populations, species_set, generation))
+
+    @staticmethod
+    def retrieve_populations(filename):
+        """Resumes the populations from a previous saved point."""
+        with gzip.open(filename) as f:
+            instruments, generation, config, populations, species_set, rndstate = pickle.load(f)
+            return populations
+
+    @staticmethod
+    def retrieve_populations_deprecated(filename):
+        """Resumes the populations from a previous saved point."""
+        with gzip.open(filename) as f:
+            generation, config, populations, species_set, rndstate = pickle.load(f)
+            return config, populations

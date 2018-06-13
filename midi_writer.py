@@ -1,30 +1,26 @@
 from mido import Message, MidiFile, MidiTrack  # library imports
 
 
-def generate_and_save_midi(file_path, music, num_of_octaves, initial_track):
-    # music.pop(0, None)
-    scaled_composition = scale_parts(music, num_of_octaves)
+def generate_and_save_midi(file_path, music, initial_track):
+    scaled_composition = scale_parts(music)
     write_file(file_path, scaled_composition, initial_track)
 
 
-def scale_parts(music, num_of_octaves):
+def scale_parts(music):
     """
     Scales values of pitches of each track depending on the associate instrument.
     :param music: a dictionary of generated tracks (already parsed by music_parser(music))
-    :param num_of_octaves: number of octaves TODO: now works only with 1-3 octaves, make more general
     :return: generated tracks with scaled values of pitches
     """
 
     for instrument, track in music.items():
         offset = 0
-        if instrument == 0:
-            offset = 12 * 5
         if instrument == 1:
-            offset = 12 * (4 - num_of_octaves + 1)
+            offset = 12 * (4 - 2 + 1)
         elif instrument == 26:
-            offset = 12 * (3 - num_of_octaves + 1)
+            offset = 12 * (3 - 2 + 1)
         elif instrument == 33:
-            offset = 12 * (4 - num_of_octaves + 1)
+            offset = 12 * (4 - 2 + 1)
         for chord_tuple in track:
             for i in range(len(chord_tuple[0])):
                 chord_tuple[0][i] = chord_tuple[0][i] + offset
