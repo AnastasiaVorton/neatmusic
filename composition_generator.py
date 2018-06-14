@@ -1,3 +1,5 @@
+import os
+
 from evaluation import Evaluator
 from fitness import music_parser
 from midi_reader import read_file, get_original_track
@@ -14,7 +16,7 @@ def generate_composition(checkpoint_file_name, midi_file_name, new_midi_file_nam
     :param new_midi_file_name:
     :return:
     """
-    configs, populations = Checkpointer.retrieve_populations(checkpoint_file_name)
+    configs, populations = Checkpointer.retrieve_populations('checkpoints' + os.sep + checkpoint_file_name)
     world = create_fittest_world(populations)
     nns = create_nns_from_world(world, configs)
     initial_melody = read_file(midi_file_name)

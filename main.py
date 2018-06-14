@@ -12,19 +12,21 @@ input_melody_octaves = 1
 
 def main() -> None:
     # Config and data initialization
-    generate_composition('checkpoint-287', 'jinglebells2.mid', 'result.mid')
-
-    instruments = read_settings()
-    configs = create_config(instruments)
     data = read_all_dataset(input_melody_octaves)
     training_set = random.sample(data, 5)
 
     # Multiple world initialization
-    p = Checkpointer.restore_checkpoint('checkpoint-287')
-    # p = Multipleworld(configs, instruments)
+    settings = read_settings()
+    if settings[0]:
+        p = Checkpointer.restore_checkpoint('checkpoints' + os.sep + settings[1])
+    else:
+        instruments = settings[1]
+        configs = create_config(instruments)
+        p = Multipleworld(configs, instruments)
     p.add_reporter(StdOutReporter(True))
     p.add_reporter(StatisticsReporter())
-    p.add_reporter(Checkpointer(instruments=instruments, generation_interval=1, filename_prefix='checkpoint-'))
+    p.add_reporter(
+        Checkpointer(instruments=p.outputs, generation_interval=1, filename_prefix='checkpoints' + os.sep + 'cp-'))
 
     # Running and result handling
     evaluator = Evaluator(training_set)
@@ -32,7 +34,31 @@ def main() -> None:
     print(winner)
 
 
-def read_settings() -> Dict[int, int]:
+def read_settings():
+    """
+    Reads whether a user wants to restore training or start a new one
+    :return:
+    """
+    continue_or_new = input("Do you want to restore previous generation or start new? [res/new] ")
+    if continue_or_new == 'res':
+        checkpoint_name = find_last_checkpoint()
+        return True, checkpoint_name
+    elif continue_or_new == 'new':
+        instruments = read_instruments()
+        return False, instruments
+
+
+def find_last_checkpoint():
+    """
+    finds the name of last check point
+    :return: the name of last check point
+    """
+    file_list = [f for f in os.listdir('checkpoints') if f.startswith('cp-')]
+    file_list.sort(key=lambda var:[int(x) if x.isdigit() else x for x in re.findall(r'[^0-9]|[0-9]+', var)])
+    return file_list[len(file_list) - 1]
+
+
+def read_instruments() -> Dict[int, int]:
     """
     Reads the instrument list from the standard input
     :return: a map with requested instruments and numbers of outputs for each instrument
