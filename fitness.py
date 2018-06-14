@@ -26,7 +26,7 @@ def two_tracks_consonance_fitness(track1, track2):
             if chord1[2] == chord2[2]:
                 simultaneous_chords = simultaneous_chords + 1
                 chords_fitness = chords_fitness + two_chords_consonance_fitness(chord1, chord2)
-    return chords_fitness/simultaneous_chords
+    return chords_fitness / simultaneous_chords
 
 
 def two_chords_consonance_fitness(chord1, chord2):
@@ -42,7 +42,7 @@ def two_chords_consonance_fitness(chord1, chord2):
             diff = abs(pitch1 % 12 - pitch2 % 12)
             if diff in consonants:
                 good_intervals = good_intervals + 1
-    return good_intervals/(len(chord1[0])*len(chord2[0]))
+    return good_intervals / (len(chord1[0]) * len(chord2[0]))
 
 
 def check_tonality(separate_track):
@@ -130,7 +130,7 @@ def dissonance_check(first, second):
             return True
     # first is unstable
     if first[0][0] % 12 == 5 and first[0][1] % 12 == 7 and second[0][1] % 12 == 7 and (
-                second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
+            second[0][0] % 12 == 4 or second[0][0] % 12 == 7):
         return True
     return False
 
@@ -146,9 +146,9 @@ def check_intervals(separate_track):
             if is_in_tonality(first % 12):
                 #  checks for consonance
                 if (second % 12 == first % 12 + 3) or (second % 12 == first % 12 + 4) or (
-                                second % 12 == first % 12 + 5) or (second % 12 == first % 12 + 7) or (
-                                second % 12 == first % 12 + 8) or (second % 12 == first % 12 + 9) or (
-                                second % 12 == first % 12):
+                        second % 12 == first % 12 + 5) or (second % 12 == first % 12 + 7) or (
+                        second % 12 == first % 12 + 8) or (second % 12 == first % 12 + 9) or (
+                        second % 12 == first % 12):
                     num_good += 1
                 # checks for dissonance
                 if index < len(separate_track) - 1:
@@ -177,7 +177,6 @@ def check_timestamp_fitness(main, second, percents):
 
 
 def chord_length(track) -> float:
-
     sum_lengths = 0.0
     bad_lengths = 0.0
     for _, length, _ in track:
@@ -206,15 +205,15 @@ def fitness_function(music):
         if instr == 1 or instr == 25:
             result += check_tonality(notes)
             result -= chord_length(notes) * 2
-            #result += check_notes_number(instr, notes)
-            #result += check_chord_intervals(instr, notes)
-            #result += check_intervals(notes)
+            # result += check_notes_number(instr, notes)
+            # result += check_chord_intervals(instr, notes)
+            # result += check_intervals(notes)
             results[instr] = result
         # check for bass
         elif instr == 33:
             result += check_tonality(notes)
             result -= chord_length(notes) * 2
-            #result += check_notes_number(instr, notes)
+            # result += check_notes_number(instr, notes)
             results[instr] = result
     main = music.get(0)
     left_hand = music.get(piano)
@@ -222,40 +221,43 @@ def fitness_function(music):
     return results
 
 
-def music_parser(part) -> List[Tuple[List[int], float, int]]:
+def music_parser(part) -> Dict[int, List[Tuple[List[int], float, int]]]:
     """
     Parse list by the beginning.
-    :param part: given music
+    :param music: given music
     :return: list of chords, chord is defined as tuple of list of pitches, duration, and start offset
     """
-    # Rectify input music
+    #  Rectify input music
     for tick in range(len(part)):
         if tick % 2 == 0:
             continue
         for i in range(len(part[tick])):
             if part[tick - 1][i] == 1.0:
-                part[tick][i] = 1.0
-            else:
-                part[tick][i] = 0.0
+                if part[tick - 1][i] != part[tick][i]:
+                    part[tick][0] = 2.0
+                    break
+            if tick == len(part) - 1:
+                part[tick][0] = 2.0
     # Parse music
-    cnt = 1
+    cnt = 0
     chord = []
     parsed_part = []
     note_start = 0
     for tick in range(len(part)):
         end_of_chord = False
+        if tick % 2 == 0:
+            cnt += 2
+            continue
         if tick != len(part) - 1:
-            for i in range(len(part[tick])):
-                if part[tick][i] != part[tick + 1][i]:
-                    end_of_chord = True
-                    break
+            if part[tick][0] == 2.0:
+                part[tick][0] = part[tick - 1][0]
+                end_of_chord = True
         if end_of_chord or tick == len(part) - 1:
-            for i in range(len(part[tick])):
-                if part[tick][i] == 1.0:
+            for i in range(len(part[tick]) - 1):
+                if part[tick - 1][i] == 1.0:
                     chord.append(i % 12)
             parsed_part.append((chord.copy(), float(cnt) / 64, note_start))
             note_start = tick + 1
             chord.clear()
             cnt = 0
-        cnt += 1
     return parsed_part
