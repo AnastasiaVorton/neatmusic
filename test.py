@@ -40,48 +40,46 @@ def write_track(type):
     return chords
 
 
-def music_parser(music):
-    """      
+def music_parser(part): #-> Dict[int, List[Tuple[List[int], float, int]]]:
+    """
     Parse list by the beginning.
     :param music: given music
-    :return: parsed list of notes
+    :return: list of chords, chord is defined as tuple of list of pitches, duration, and start offset
     """
-    # Rectify input music
-    for part in music.keys():
-        for tick in range(len(music[part])):
-            if tick % 2 == 0:
-                continue
-            for i in range(len(music[part][tick])):
-                if music[part][tick - 1][i] == 1.0:
-                    music[part][tick][i] = 1.0
-                else:
-                    music[part][tick][i] = 0.0
+    #  Rectify input music
+    for tick in range(len(part)):
+        if tick % 2 == 0:
+            continue
+        for i in range(len(part[tick])):
+            if part[tick - 1][i] == 1.0:
+                if part[tick - 1][i] != part[tick][i]:
+                    part[tick][0] = 2.0
+                    break
+            if tick == len(part) - 1:
+                part[tick][0] = 2.0
     # Parse music
-    parsed_music = {}
-    for part in music.keys():
-        cnt = 1
-        chord = []
-        parsed_part = []
-        note_start = 0
-        for tick in range(len(music[part])):
-            end_of_chord = False
-            if tick != len(music[part]) - 1:
-                for i in range(len(music[part][tick])):
-                    if music[part][tick][i] != music[part][tick + 1][i]:
-                        end_of_chord = True
-                        break
-            if end_of_chord or tick == len(music[part]) - 1:
-                for i in range(len(music[part][tick])):
-                    if music[part][tick][i] == 1.0:
-                        chord.append(i % 12)
-                parsed_part.append((chord.copy(), float(cnt) / 64, note_start))
-                note_start = tick + 1
-                chord.clear()
-                cnt = 0
-            cnt += 1
-        if not len(parsed_part) == 0:
-            parsed_music[part] = parsed_part.copy()
-    return parsed_music.copy()
+    cnt = 0
+    chord = []
+    parsed_part = []
+    note_start = 0
+    for tick in range(len(part)):
+        end_of_chord = False
+        if tick % 2 == 0:
+            cnt += 2
+            continue
+        if tick != len(part) - 1:
+            if part[tick][0] == 2.0:
+                part[tick][0] = part[tick - 1][0]
+                end_of_chord = True
+        if end_of_chord or tick == len(part) - 1:
+            for i in range(len(part[tick]) - 1):
+                if part[tick - 1][i] == 1.0:
+                    chord.append(i % 12)
+            parsed_part.append((chord.copy(), float(cnt) / 64, note_start))
+            note_start = tick + 1
+            chord.clear()
+            cnt = 0
+    return parsed_part
 
 
 def is_in_tonality(note):
