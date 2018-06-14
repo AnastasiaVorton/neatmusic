@@ -72,7 +72,9 @@ class Evaluator:
     def evaluate(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]):
         tracks = Evaluator.generate_tracks(world, melody)
         tracks[0] = melody
-        cleaned = music_parser(tracks)
+        cleaned = {}
+        for i in tracks.keys():
+            cleaned[i] = music_parser(tracks[i])
         fitness = fitness_function(cleaned)
         return sum(fitness.values()) / len(fitness)
 
