@@ -21,7 +21,9 @@ def generate_composition(checkpoint_file_name, midi_file_name, new_midi_file_nam
     nns = create_nns_from_world(world, configs)
     initial_melody = read_file(midi_file_name)
     tracks = Evaluator.generate_tracks(nns, initial_melody)
-    cleaned = music_parser(tracks)
+    cleaned = {}
+    for i in tracks.keys():
+        cleaned[i] = music_parser(tracks[i])
     generate_and_save_midi(new_midi_file_name, cleaned, get_original_track(midi_file_name))
 
 
