@@ -1,5 +1,7 @@
 import os
 import re
+import datetime
+import sys
 
 from composition_generator import generate_composition
 from evaluation import *
@@ -12,16 +14,17 @@ input_melody_octaves = 1
 
 def main() -> None:
     # Config and data initialization
-    generate_composition('checkpoint-287', 'jinglebells2.mid', 'result.mid')
-
     instruments = read_settings()
     configs = create_config(instruments)
     data = read_all_dataset(input_melody_octaves)
     training_set = random.sample(data, 5)
+    dirname = str(datetime.datetime.now())
+    os.mkdir(dirname)
+    os.chdir(dirname)
 
     # Multiple world initialization
-    p = Checkpointer.restore_checkpoint('checkpoint-287')
-    # p = Multipleworld(configs, instruments)
+    #p = Checkpointer.restore_checkpoint('checkpoint-287')
+    p = Multipleworld(configs, instruments)
     p.add_reporter(StdOutReporter(True))
     p.add_reporter(StatisticsReporter())
     p.add_reporter(Checkpointer(instruments=instruments, generation_interval=1, filename_prefix='checkpoint-'))
@@ -61,4 +64,8 @@ def create_config(instruments: Dict[int, int]) -> Dict[int, Config]:
 
 
 if __name__ == "__main__":
-    main()
+    if len(sys.argv) > 1:
+        name = sys.argv[1]
+        generate_composition(name, 'jinglebells2.mid', 'result.mid')
+    else:
+        main()
