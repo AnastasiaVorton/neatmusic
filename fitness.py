@@ -7,7 +7,8 @@ piano = 1
 guitar_acoustic = 25
 guitar_bass = 33
 consonants = [0, 3, 4, 5, 7, 8, 9]
-chord_length_threshold = 1.0
+chord_length_threshold = 0.75
+chord_limits = {piano: 4, guitar_acoustic: 3, guitar_bass: 1}
 
 
 def two_tracks_consonance_fitness(track1, track2):
@@ -68,18 +69,14 @@ def check_notes_number(instrument, separate_track):
     Checks if the number of notes in chord less or equal to 4.
     :return: The value of correctness (in percents).
     """
-    num_good = 0
-    limit = 3
-    if instrument == guitar_bass:
-        limit = 1
-    elif instrument == piano:
-        limit = 4
-    for chord in separate_track:
-        if len(chord[0]) <= limit:
-            num_good += 1
-    # ratio of good duration of musical units to total number of units
-    perc_good = num_good / max(len(separate_track), 1)
-    return perc_good
+    value = 0
+    limit = chord_limits.get(instrument) or 3
+    for pitches, _, _ in separate_track:
+        if len(pitches) <= limit:
+            value += 1
+        else:
+            value += 2 ** (limit - len(pitches))
+    return value / max(len(separate_track), 1)
 
 
 def is_in_tonality(note):
@@ -176,12 +173,17 @@ def check_timestamp_fitness(main, second, percents):
 
 
 def chord_length(track) -> float:
+    """
+    Evaluates the track for presence of too long chords
+    :param track:
+    :return: the ratio of excess length to the track's length
+    """
     sum_lengths = 0.0
     bad_lengths = 0.0
     for _, length, _ in track:
         sum_lengths += length
         if length > chord_length_threshold:
-            bad_lengths += length
+            bad_lengths += length - chord_length_threshold
     return bad_lengths / max(sum_lengths, 1.0)
 
 
