@@ -13,7 +13,7 @@ input_melody_octaves = 1
 def main() -> None:
     # Config and data initialization
     data = read_all_dataset(input_melody_octaves)
-    training_set = random.sample(data, 5)
+    training_set = random.sample(data, 30)
 
     # Multiple world initialization
     settings = read_settings()

@@ -7,7 +7,8 @@ from neat.nn import MLRecurrentNetwork
 
 from fitness import fitness_function, music_parser
 
-ticks_delay = 128
+ticks_delay = 32
+tracks_per_eval = 5
 
 
 class Evaluator:
@@ -59,9 +60,8 @@ class Evaluator:
         :param world: dictionary of instruments
         :return: list of jobs for each track in the dataset
         """
-
-        jobs = [self.pool.apply_async(Evaluator.evaluate, (world, random.choice(self.dataset)))]
-        return jobs
+        return [self.pool.apply_async(Evaluator.evaluate, (world, track))
+                for track in random.sample(self.dataset, tracks_per_eval)]
 
     @staticmethod
     def combine_world_fitness(jobs) -> float:
