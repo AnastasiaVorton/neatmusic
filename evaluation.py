@@ -8,7 +8,7 @@ from neat.nn import MLRecurrentNetwork
 from fitness import fitness_function, music_parser
 
 ticks_delay = 32
-tracks_per_eval = 5
+tracks_per_eval = 1
 
 
 class Evaluator:
