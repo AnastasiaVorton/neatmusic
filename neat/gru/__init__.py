@@ -32,6 +32,7 @@ class GRUNodeGene(BaseGene):
                         DynamicAttribute('forget_gate')]
     _read_gate_idx = 4
     _forget_gate_idx = 5
+
     def __init__(self, key):
         assert isinstance(key, int), "GRUNodeGene key must be an int, not {!r}".format(key)
         BaseGene.__init__(self, key)
@@ -153,14 +154,7 @@ class GRUNetwork(object):
                 s = aggregation(node_inputs)
                 t_val[node] = activation(bias + response * s)
             else:
-                rt = gates[0]
-                zt = gates[1]
-
-                # Check if gates are assigned to nodes
-                if type(rt) is int:
-                    rt = t_val[rt]
-                if type(zt) is int:
-                    zt = t_val[zt]
+                rt, zt = gates
 
                 node_inputs = [t_m1_val[i] for i, w in links]
 
@@ -274,22 +268,10 @@ class GRUNetworkML(object):
                 s = aggregation(node_inputs)
                 t_val[node] = activation(bias + response * s)
             else:
-                rt = gates[0]
-                zt = gates[1]
-
-                # Check if gates are assigned to nodes
-                if type(rt) is int:
-                    rt = t_val[rt]
-                if type(zt) is int:
-                    zt = t_val[zt]
-
+                rt, zt = gates
                 node_inputs = [t_m1_val[-i + r_idx0] * w * rt if i <= r_idx0 else t_val[i] for i, w in links]
-
                 s_c = activation(aggregation(node_inputs))
-
-                t_val[node] = zt * t_m1_val[node] + (1 - zt) * s_c
-
-
+                t_val[node] = s_c * t_m1_val[node] + (1 - s_c) * s_c
 
         return [t_val[i] for i in self.output_nodes]
 

@@ -4,16 +4,16 @@ fitness_threshold     = 3.75
 pop_size              = 600
 reset_on_extinction   = True
 
-[DefaultGenome]
+[GRUGenome]
 # node activation options
 activation_default      = sigmoid
-activation_mutate_rate  = 0.1
-activation_options      = sigmoid gauss
+activation_mutate_rate  = 0.0
+activation_options      = sigmoid
 
 # node aggregation options
 aggregation_default     = sum
-aggregation_mutate_rate = 0.1
-aggregation_options     = sum mean
+aggregation_mutate_rate = 0.0
+aggregation_options     = sum
 
 # node bias options
 bias_init_mean          = 0.0
@@ -23,6 +23,13 @@ bias_min_value          = -100.0
 bias_mutate_power       = 1.0
 bias_mutate_rate        = 0.7
 bias_replace_rate       = 0.1
+
+read_gate_default = 1.0
+read_gate_mutate_rate = 0.3
+forget_gate_default = 0.0
+forget_gate_mutate_rate = 0.3
+gru_prob = 1.0
+
 
 # genome compatibility options
 compatibility_disjoint_coefficient = 1.0
@@ -34,9 +41,9 @@ conn_delete_prob        = 0.4
 
 # connection enable options
 enabled_default         = True
-enabled_mutate_rate     = 0.1
+enabled_mutate_rate     = 0.0
 
-feed_forward            = False
+feed_forward            = True
 initial_connection      = unconnected
 
 # node add/remove rates
@@ -47,7 +54,7 @@ node_delete_prob        = 0.3
 num_hidden              = 0
 num_inputs              = 1
 num_outputs             = 1
-nw_type                 = rnn
+nw_type                 = gru
 
 # node response options
 response_init_mean      = 1.0

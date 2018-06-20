@@ -1,10 +1,12 @@
 import os
 import re
+import random
 
 from composition_generator import generate_composition
 from evaluation import *
 from multipleworld import *
 from midi_reader import read_all_dataset
+from neat.gru import GRUGenome
 
 instrument_outputs = {0: 12, 1: 24, 25: 36, 33: 24}
 input_melody_octaves = 1
@@ -79,7 +81,7 @@ def create_config(instruments: Dict[int, int]) -> Dict[int, Config]:
     num_inputs = input_melody_octaves * 12 + sum(instruments.values()) + 1
     configs = {}
     for instrument, num_outputs in instruments.items():
-        config = Config(DefaultGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
+        config = Config(GRUGenome, DefaultReproduction, DefaultSpeciesSet, DefaultStagnation, conf_path)
         config.set_num_inputs(num_inputs)
         config.set_num_outputs(num_outputs)
         configs[instrument] = config
