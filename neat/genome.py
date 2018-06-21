@@ -20,7 +20,7 @@ class DefaultGenomeConfig(object):
     allowed_connectivity = ['unconnected', 'fs_neat_nohidden', 'fs_neat', 'fs_neat_hidden',
                             'full_nodirect', 'full', 'full_direct',
                             'partial_nodirect', 'partial', 'partial_direct']
-    nw_types = ['default', 'rnn', 'mlrnn', 'ctrnn', 'iznn']
+    nw_types = ['default', 'rnn', 'mlrnn', 'ctrnn', 'iznn', 'gru']
 
     def __init__(self, params):
         # Create full set of available activation functions.
@@ -349,7 +349,10 @@ class DefaultGenome(object):
         possible_outputs = list(iterkeys(self.nodes))
         out_node = choice(possible_outputs)
 
-        possible_inputs = possible_outputs + config.input_keys
+        possible_inputs = list(set(possible_outputs) - set(config.output_keys)) + config.input_keys
+        if config.nw_type == 'gru':
+            m = -len(config.input_keys) - 1
+            possible_inputs = possible_inputs + [-i + m for i in possible_outputs]
         in_node = choice(possible_inputs)
 
         # Don't duplicate connections.
@@ -391,7 +394,7 @@ class DefaultGenome(object):
         for k, v in iteritems(self.connections):
             if del_key in v.key:
                 connections_to_delete.add(v.key)
-            if config.nw_type == 'mlrnn':  # Check recurrent connections from our node
+            if config.nw_type == 'mlrnn' or config.nw_type == 'gru':  # Check recurrent connections from our node
                 if -del_key - config.num_inputs - 1 == v.key[0]:
                     connections_to_delete.add(v.key)
 

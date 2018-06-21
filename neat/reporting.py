@@ -145,6 +145,7 @@ class StdOutReporter(BaseReporter):
                                                                                  best_genome.size(),
                                                                                  best_species_id,
                                                                                  best_genome.key))
+        print(best_genome)
 
     def complete_extinction(self):
         self.num_extinctions += 1

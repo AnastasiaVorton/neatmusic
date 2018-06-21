@@ -247,8 +247,8 @@ def fitness_function(music):
         result = 0.0
         # check for piano and rhythm guitar
         if instr == 1 or instr == 25:
-            # result += check_tonality(notes)
-            # result -= chord_length(notes) * 2
+            result += check_tonality(notes) * 0.25
+            result -= chord_length(notes)
             # result += check_notes_number(instr, notes)
             # result += check_chord_intervals(instr, notes)
             # result -= check_variety(notes) * 2

@@ -3,7 +3,7 @@ from multiprocessing import Pool
 from typing import *
 
 from neat import *
-from neat.nn import MLRecurrentNetwork
+from neat.gru import GRUNetworkML
 
 from fitness import fitness_function, music_parser
 
@@ -37,7 +37,7 @@ class Evaluator:
             assert len(pop) == pop_size
 
         # Create a neural network from each genome
-        nns = {name: [MLRecurrentNetwork.create(genome, configs[name]) for _, genome in genomes]
+        nns = {name: [GRUNetworkML.create(genome, configs[name]) for _, genome in genomes]
                for name, genomes in populations.items()}
 
         # Combine a neural network with other neural networks
@@ -54,7 +54,7 @@ class Evaluator:
                 genome_index = shuffled[instrument][world_index]
                 populations[instrument][genome_index][1].fitness = rating
 
-    def run_world_evaluation(self, world: Dict[int, MLRecurrentNetwork]):
+    def run_world_evaluation(self, world: Dict[int, GRUNetworkML]):
         """
         Uses the pool to run the world evaluation
         :param world: dictionary of instruments
@@ -69,7 +69,7 @@ class Evaluator:
         return out / len(jobs)
 
     @staticmethod
-    def evaluate(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]):
+    def evaluate(world: Dict[int, GRUNetworkML], melody: List[List[float]]):
         tracks = Evaluator.generate_tracks(world, melody)
         tracks[0] = melody
         cleaned = {}
@@ -79,7 +79,7 @@ class Evaluator:
         return sum(fitness.values()) / len(fitness)
 
     @staticmethod
-    def generate_tracks(world: Dict[int, MLRecurrentNetwork], melody: List[List[float]]) -> Dict[int, List[List[float]]]:
+    def generate_tracks(world: Dict[int, GRUNetworkML], melody: List[List[float]]) -> Dict[int, List[List[float]]]:
         """
         Runs the world with a melody
         :param world: dictionary of instruments
