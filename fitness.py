@@ -1,4 +1,5 @@
 import math
+import statistics
 from typing import *
 
 # C major notes
@@ -171,7 +172,6 @@ def check_timestamp_fitness(main, second, percents):
     else:
         return perc_good
 
-
 def chord_length(track) -> float:
     """
     Evaluates the track for presence of too long chords
@@ -188,7 +188,8 @@ def chord_length(track) -> float:
 
 
 def check_variety(track):
-    occurrences = {128: 0}
+    occurrences = {}
+    occurrences[128] = 0
     for chord_tuple in track:
         if len(chord_tuple[0]) == 0:
             occurrences[128] = occurrences[128] + chord_tuple[1] * 64
@@ -198,10 +199,35 @@ def check_variety(track):
             else:
                 occurrences[note] = occurrences[note] + chord_tuple[1] * 64
     occurrence_list = list(occurrences.values())
-    last_chord = track[len(track) - 1]
-    max_occurrence = max(occurrence_list)
-    x = max_occurrence/(last_chord[1] * 64 + last_chord[2])
-    return x
+    if len(occurrence_list) == 0:
+        return 0
+    else:
+        last_chord = track[len(track) - 1]
+        max_occurrence = max(occurrence_list)
+        x = max_occurrence/(last_chord[1] * 64 + last_chord[2])
+
+        return x
+
+
+def encourage_variety(track):
+    occurrences = {}
+    occurrences[128] = 0
+    for chord_tuple in track:
+        if len(chord_tuple[0]) == 0:
+            occurrences[128] = occurrences[128] + 1
+        for note in chord_tuple[0]:
+            if note not in occurrences.keys():
+                occurrences[note] = 1
+            else:
+                occurrences[note] = occurrences[note] + 1
+    occurrence_list = list(occurrences.values())
+    # if len(occurrence_list) >= 2:
+    #     sd = statistics.stdev(occurrence_list)
+    #     print(sd, "len: ", len(occurrence_list))
+    if len(occurrence_list) > 0:
+        return len(occurrence_list)/13
+    else:
+        return 0
 
 
 def fitness_function(music):
@@ -221,12 +247,13 @@ def fitness_function(music):
         result = 0.0
         # check for piano and rhythm guitar
         if instr == 1 or instr == 25:
-            result += check_tonality(notes) * 2
-            result -= chord_length(notes)
+            # result += check_tonality(notes)
+            # result -= chord_length(notes) * 2
             # result += check_notes_number(instr, notes)
-            result += check_chord_intervals(instr, notes)
-            result -= check_variety(notes) ** 2 * 2
+            # result += check_chord_intervals(instr, notes)
+            # result -= check_variety(notes) * 2
             # result += check_intervals(notes)
+            result += encourage_variety(notes)
             results[instr] = result
         # check for bass
         elif instr == 33:
@@ -236,7 +263,7 @@ def fitness_function(music):
             results[instr] = result
     main = music.get(0)
     left_hand = music.get(piano)
-    results[128] = check_timestamp_fitness(main, left_hand, 0.5)
+    # results[128] = check_timestamp_fitness(main, left_hand, 0.5)
     return results
 
 
